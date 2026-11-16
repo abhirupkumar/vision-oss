@@ -1,0 +1,125 @@
+---
+title: Track a single-page application
+---
+
+Single-page applications (SPAs) built with React, Next.js, Vue, Nuxt, Angular, and similar frameworks work with Vision out of the box. The tracker script automatically detects client-side navigation and records page views without any extra configuration.
+
+## Basic setup
+
+Add the Vision tracker script to your application's `<head>` just like any other website. The script handles both traditional page loads and client-side route changes.
+
+### Next.js (App Router)
+
+Add the script to your root layout:
+
+```tsx
+// app/layout.tsx
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <head>
+        <script
+          defer
+          src="NEXT_PUBLIC_TRACKER_URL/script.js"
+          data-project-id="your-project-id"
+        />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+Alternatively, use the Next.js `Script` component:
+
+```tsx
+import Script from "next/script";
+
+<Script
+  src="NEXT_PUBLIC_TRACKER_URL/script.js"
+  data-project-id="your-project-id"
+  strategy="afterInteractive"
+/>;
+```
+
+### React (Vite / Create React App)
+
+Add the script tag to your `index.html`:
+
+```html
+<!-- index.html -->
+<head>
+  <script
+    defer
+    src="NEXT_PUBLIC_TRACKER_URL/script.js"
+    data-project-id="your-project-id"
+  ></script>
+</head>
+```
+
+### Vue / Nuxt
+
+For Nuxt, add it to `nuxt.config.ts`:
+
+```ts
+export default defineNuxtConfig({
+  app: {
+    head: {
+      script: [
+        {
+          src: "NEXT_PUBLIC_TRACKER_URL/script.js",
+          defer: true,
+          "data-project-id": "your-project-id",
+        },
+      ],
+    },
+  },
+});
+```
+
+For plain Vue with Vite, add the script to `index.html` just like React.
+
+### Angular
+
+Add the script to `src/index.html`:
+
+```html
+<head>
+  <script
+    defer
+    src="NEXT_PUBLIC_TRACKER_URL/script.js"
+    data-project-id="your-project-id"
+  ></script>
+</head>
+```
+
+## How it works
+
+Vision's tracker script monitors the browser's History API (`pushState` and `replaceState`) and the `popstate` event. When your SPA navigates to a new route, Vision automatically sends a page view with the updated URL and title.
+
+This means you do **not** need to manually call `vision.track()` for page views in most cases.
+
+## Tracking custom events in components
+
+To track button clicks or other interactions within your components, use the [data attributes](/docs/track-events) approach or call `vision.track()` directly:
+
+```tsx
+// React example
+<button data-vision-event="signup-click" data-vision-event-plan="pro">
+  Sign Up
+</button>
+```
+
+Or with JavaScript:
+
+```tsx
+function handleCheckout() {
+  Vision.track("checkout", { plan: "pro", price: 29 });
+}
+```
+
+## Troubleshooting
+
+- **Pages not tracked after navigation**: Make sure the tracker script is loaded once in the root layout, not re-added on every route change.
+- **Duplicate page views**: Avoid calling `vision.track()` without arguments in `useEffect` or `onMounted` hooks, since the tracker already records navigation automatically.
+- **Hash-based routing**: If your app uses hash routing (`/#/page`), Vision tracks these by default. You can disable hash collection with `data-exclude-hash="true"` if needed.

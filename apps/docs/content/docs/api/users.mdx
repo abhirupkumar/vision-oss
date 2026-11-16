@@ -1,0 +1,70 @@
+---
+title: Users
+---
+
+Operations for administrative user management.
+
+> [!NOTE]
+> Creating and managing users across the platform requires an authenticated account with the **admin** role.
+
+**Endpoints**
+
+```text
+POST NEXT_PUBLIC_API_URL/users
+GET NEXT_PUBLIC_API_URL/users/:userId
+POST NEXT_PUBLIC_API_URL/users/:userId
+DELETE NEXT_PUBLIC_API_URL/users/:userId
+GET NEXT_PUBLIC_API_URL/users/:userId/projects
+GET NEXT_PUBLIC_API_URL/users/:userId/organizations
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/users
+
+Creates a new user account.
+
+**Request body**
+
+| Property   | Type   | Description                                           |
+| ---------- | ------ | ----------------------------------------------------- |
+| `email`    | string | **Required**. Valid email address.                    |
+| `password` | string | (optional) Account password.                          |
+| `role`     | string | (optional, default `user`) `admin`, `user`, or `view-only`. |
+
+```json
+{
+  "email": "teammate@example.com",
+  "role": "user"
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/users/:userId
+
+Returns user profile details by ID.
+
+---
+
+## POST NEXT_PUBLIC_API_URL/users/:userId
+
+Updates an existing user's role or profile details.
+
+---
+
+## DELETE NEXT_PUBLIC_API_URL/users/:userId
+
+Permanently removes a user account.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/users/:userId/projects
+
+Returns all projects associated with the specified user.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/users/:userId/organizations
+
+Returns all organizations the specified user belongs to.

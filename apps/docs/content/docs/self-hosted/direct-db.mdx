@@ -1,0 +1,99 @@
+---
+title: Track 1 - Direct Ingestion
+description: Deploy Vision Community Edition with 1 command using Docker Compose.
+---
+
+The **Direct Ingestion Track** is the fastest and simplest way to run Vision. It runs the entire stack—PostgreSQL, ClickHouse, the Hono backend API, and the Next.js dashboard—without requiring Kafka or distributed message brokers.
+
+## Prerequisites
+
+- [Docker Engine](https://docs.docker.com/engine/install/) (v24.0 or higher)
+- [Docker Compose](https://docs.docker.com/compose/) (v2.20 or higher)
+- A server with at least 2 vCPUs and 4GB RAM (e.g. a $10–$20/mo VPS on Hetzner, DigitalOcean, or AWS EC2).
+
+---
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/abhirupkumar/vision-oss.git vision
+cd vision
+```
+
+---
+
+## 2. Configure Environment Variables
+
+Copy the sample environment file:
+
+```bash
+cp docker/.env.oss.example .env
+```
+
+Review the default `.env` configuration:
+
+```bash
+# Application Ports
+PORT=3000
+BACKEND_PORT=3001
+NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_IS_CLOUD=false
+
+# PostgreSQL Database
+DATABASE_URL=postgresql://vision_user:vision_password@postgres:5432/vision
+
+# ClickHouse Analytics Database
+CLICKHOUSE_URL=http://clickhouse:8123
+
+# Direct Ingestion Flag (No Kafka)
+KAFKA_PRESENT=false
+DISABLE_BOT_CHECK=false
+```
+
+---
+
+## 3. Start the Cluster
+
+Run Docker Compose in detached mode:
+
+```bash
+docker compose up -d
+```
+
+Verify that all containers are healthy:
+
+```bash
+docker compose ps
+```
+
+You should see 4 active services:
+- `vision-postgres`: Port `5432` (metadata storage)
+- `vision-clickhouse`: Port `8123` & `9000` (time-series analytics)
+- `vision-backend`: Port `3001` (telemetry API & LLM proxy)
+- `vision-dashboard`: Port `3000` (web console)
+
+---
+
+## 4. Access the Dashboard
+
+Open your browser and navigate to:
+
+```text
+http://localhost:3000
+```
+
+1. Create your initial admin account.
+2. Create your first project.
+3. Grab your tracking script snippet and add it to your website or web application!
+
+---
+
+## Updating to the Latest Release
+
+To pull the newest updates and rebuild containers:
+
+```bash
+git pull origin main
+docker compose build
+docker compose up -d
+```

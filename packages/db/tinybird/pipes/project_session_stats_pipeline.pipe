@@ -1,0 +1,31 @@
+DESCRIPTION >
+    Populates session stats from project events
+
+NODE project_session_stats_mv
+SQL >
+    SELECT
+        project_id,
+        session_id,
+        toDate(min(created_at)) AS session_date,
+        argMaxState(visitor_id, created_at) AS visitor_id,
+        argMaxState(browser, created_at) AS browser,
+        argMaxState(os, created_at) AS os,
+        argMaxState(device, created_at) AS device,
+        argMaxState(country, created_at) AS country,
+        argMaxState(hostname, created_at) AS hostname,
+        argMaxState(screen, created_at) AS screen,
+        argMaxState(language, created_at) AS language,
+        argMaxState(region, created_at) AS region,
+        argMaxState(city, created_at) AS city,
+        minState(created_at) AS start_time,
+        maxState(created_at) AS end_time,
+        sumState(toUInt64(event_type = 1)) AS views,
+        sumState(toUInt64(event_type = 2)) AS events,
+        sumState(CAST(0 AS Decimal(18, 4))) AS revenue
+    FROM project_event
+    GROUP BY
+        project_id,
+        session_id
+
+TYPE materialized
+DATASOURCE project_session_stats

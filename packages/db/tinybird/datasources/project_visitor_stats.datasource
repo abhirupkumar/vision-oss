@@ -1,0 +1,16 @@
+SCHEMA >
+    `project_id`      String,
+    `visitor_id`      String,
+    `visitor_date`    Date,
+    `start_time`      AggregateFunction(min, DateTime64(3, 'UTC')),
+    `last_seen`       AggregateFunction(max, DateTime64(3, 'UTC')),
+    `total_sessions`  AggregateFunction(uniq, String),
+    `total_revenue`   AggregateFunction(sum, Decimal(18, 4))
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(visitor_date)"
+ENGINE_SORTING_KEY "project_id, visitor_id, visitor_date"
+ENGINE_TTL "visitor_date + toIntervalYear(2)"
+
+FORWARD_QUERY >
+    SELECT *

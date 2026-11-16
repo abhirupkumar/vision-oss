@@ -1,0 +1,33 @@
+---
+title: AI Business Scorecard Guide
+---
+
+The **AI Business Scorecard** is an executive dashboard designed for founders, finance leaders, and product engineering teams to observe product adoption, inference infrastructure costs, and commercial profitability on a single canvas.
+
+## Key Scorecard Widgets
+
+### 1. Blended Gross Margin
+* Displays net revenue after subtracting continuous LLM model costs.
+* Shows trend comparisons against the previous period (e.g., WoW or MoM).
+* Signals margin compression when token volume expands faster than customer plan tiers.
+
+### 2. Cost-to-Serve (CTS) Telemetry
+* Computes average model inference expense per daily active user (DAU).
+* Benchmarks cost-to-serve against SaaS industry thresholds (target: under 10% of ARPU).
+
+### 3. AI ROI Ratio
+* Measures new revenue and customer expansions generated per dollar spent on model compute.
+* Evaluates feature economic viability before scaling enterprise rollouts.
+
+### 4. Accounts at Loss Warning
+* Flags customers whose prompt executions exceed their subscription price.
+* Provides direct drill-downs into token consumption and model distribution for remediation.
+
+---
+
+## Executive Setup Checklist
+
+1. **Connect Payments**: Enable Stripe, Paddle, Polar, or Lemon Squeezy in **Settings -> Billing**.
+2. **Instrument User IDs**: Pass `X-Vision-User-Id` on all model proxy calls.
+3. **Configure Guardrails**: Set budget alert thresholds in **Unit Economics -> Budget Guardrails** to notify Slack or Discord if a customer exceeds spend quotas.
+4. **Link Team Members**: Invite finance and product leaders to the Vision workspace with viewer or admin permissions.

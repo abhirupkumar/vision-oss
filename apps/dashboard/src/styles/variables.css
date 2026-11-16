@@ -1,0 +1,9 @@
+html body {
+  --primary-color: #0284C7;
+  --primary-font-color: #0F172A;
+}
+
+html.dark body {
+  --primary-color: #38BDF8;
+  --primary-font-color: #F8FAFC;
+}

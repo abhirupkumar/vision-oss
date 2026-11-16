@@ -1,0 +1,110 @@
+---
+title: Embed analytics in your app
+---
+
+Use Vision's share URLs and API to embed analytics dashboards or data directly into your own application, internal tools, or client portals.
+
+## Option 1: Embed a share URL in an iframe
+
+The simplest approach is to create a share URL and embed it in an iframe.
+
+### Create a share URL
+
+1. Navigate to your website in Vision.
+2. Click **Edit** on the website.
+3. Go to the **Share URL** section and create a new share.
+4. Copy the generated URL.
+
+### Embed in your app
+
+```html
+<iframe
+  src="https://your-domain.com/share/abc123"
+  style="width: 100%; height: 800px; border: none;"
+  loading="lazy"
+></iframe>
+```
+
+For this to work, you may need to configure the `ALLOWED_FRAME_URLS` environment variable on your Vision instance to allow your app's domain:
+
+```dotenv
+ALLOWED_FRAME_URLS="https://your-app.example.com"
+```
+
+## Option 2: Use the API to build custom dashboards
+
+For full control over the presentation, use the Vision API to fetch data and render it in your own UI.
+
+### Authentication
+
+Include your bearer token in the `Authorization` header:
+
+```js
+const token = process.env.VISION_AUTH_TOKEN;
+const headers = {
+  Authorization: `Bearer ${token}`,
+  "Content-Type": "application/json",
+};
+```
+
+### Fetch project stats
+
+```js
+const stats = await fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}/stats?startAt=${startAt}&endAt=${endAt}`,
+  { headers },
+).then((r) => r.json());
+
+// stats = { pageviews, visitors, visits, bounces, totaltime, revenue, comparison }
+```
+
+### Fetch page view time series
+
+```js
+const pageviews = await fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}/pageviews?startAt=${startAt}&endAt=${endAt}&unit=day`,
+  { headers },
+).then((r) => r.json());
+```
+
+### Render with any charting library
+
+Use the returned data with Chart.js, Recharts, D3, or any visualization library:
+
+```tsx
+import { BarChart, Bar, XAxis, YAxis } from "recharts";
+
+function PageviewsChart({ data }) {
+  return (
+    <BarChart data={data.pageviews}>
+      <XAxis dataKey="x" />
+      <YAxis />
+      <Bar dataKey="y" fill="#8884d8" />
+    </BarChart>
+  );
+}
+```
+
+## Option 3: Use the API client
+
+The [Vision API client](/docs/api/api-client) simplifies authentication and provides typed methods:
+
+```js
+import { getClient } from "@vision/api-client";
+
+// Configure via environment variables:
+//   VISION_API_CLIENT_USER_ID
+//   VISION_API_CLIENT_SECRET
+//   VISION_API_CLIENT_ENDPOINT
+// or, for Vision:
+//   VISION_API_KEY
+const client = getClient();
+
+// Methods return { ok, data, status, error }
+const { data } = await client.getWebsiteStats(websiteId, {
+  startAt: Date.now() - 86400000,
+  endAt: Date.now(),
+});
+```
+
+See the [API reference](/docs/api) for all available endpoints.

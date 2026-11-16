@@ -1,0 +1,20 @@
+SCHEMA >
+    `id`            String                      `json:$.id`,
+    `project_id`    String                      `json:$.project_id`,
+    `rule_id`       String       DEFAULT ''     `json:$.rule_id`,
+    `title`         String                      `json:$.title`,
+    `message`       String                      `json:$.message`,
+    `type`          LowCardinality(String) DEFAULT 'event'   `json:$.type`,
+    `severity`      LowCardinality(String) DEFAULT 'info'    `json:$.severity`,
+    `source`        LowCardinality(String) DEFAULT 'rule'    `json:$.source`,
+    `is_read`       UInt8        DEFAULT 0      `json:$.is_read`,
+    `payload`       String       DEFAULT ''     `json:$.payload`,
+    `created_at`    DateTime64(3, 'UTC')        `json:$.created_at`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(created_at)"
+ENGINE_SORTING_KEY "project_id, created_at"
+ENGINE_TTL "toDateTime(created_at) + toIntervalYear(1)"
+
+FORWARD_QUERY >
+  SELECT id, project_id, defaultValueOfTypeName('String') AS rule_id, title, message, defaultValueOfTypeName('LowCardinality(String)') AS type, defaultValueOfTypeName('LowCardinality(String)') AS severity, source, defaultValueOfTypeName('UInt8') AS is_read, payload, created_at

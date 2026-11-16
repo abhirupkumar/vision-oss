@@ -1,0 +1,17 @@
+NODE route
+SQL >
+    SELECT
+        project_id,
+        visitor_id,
+        session_id,
+        chunk_index,
+        events,
+        event_count,
+        started_at,
+        ended_at,
+        created_at
+    FROM k_replays
+    WHERE stream_type = 'session_replay'
+
+TYPE materialized
+DATASOURCE session_replay

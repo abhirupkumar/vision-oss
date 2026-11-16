@@ -1,0 +1,201 @@
+---
+title: Project Statistics
+---
+
+Operations for querying project analytics, time series metrics, and real-time visitor statistics.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/projects/:projectId/stats
+GET NEXT_PUBLIC_API_URL/projects/:projectId/pageviews
+GET NEXT_PUBLIC_API_URL/projects/:projectId/metrics
+GET NEXT_PUBLIC_API_URL/projects/:projectId/metrics/batch
+GET NEXT_PUBLIC_API_URL/projects/:projectId/metrics/expanded
+GET NEXT_PUBLIC_API_URL/projects/:projectId/daterange
+GET NEXT_PUBLIC_API_URL/projects/:projectId/active
+GET NEXT_PUBLIC_API_URL/projects/:projectId/channel
+GET NEXT_PUBLIC_API_URL/projects/:projectId/values
+```
+
+---
+
+## Query Filters
+
+Most statistical endpoints support query filters to segment analytics data:
+
+| Parameter     | Type   | Description                                       |
+| ------------- | ------ | ------------------------------------------------- |
+| `startAt`     | number | Starting timestamp in milliseconds (epoch).       |
+| `endAt`       | number | Ending timestamp in milliseconds (epoch).         |
+| `unit`        | string | Time bucket: `minute`, `hour`, `day`, `month`.    |
+| `timezone`    | string | Timezone identifier (e.g. `America/New_York`).    |
+| `url`         | string | URL path filter.                                  |
+| `referrer`    | string | Referrer domain or URL.                           |
+| `title`       | string | Page title.                                       |
+| `query`       | string | URL query parameter.                              |
+| `os`          | string | Operating system (e.g. `Mac OS`, `Windows 10/11`). |
+| `browser`     | string | Browser name (e.g. `Chrome`, `Firefox`, `Safari`).|
+| `device`      | string | Device category (`desktop`, `mobile`, `tablet`).  |
+| `country`     | string | ISO 3166-1 country code (e.g. `US`, `DE`).        |
+| `region`      | string | Region / state code.                              |
+| `city`        | string | City name.                                        |
+| `language`    | string | Browser language (e.g. `en-US`).                  |
+| `tag`         | string | Custom tag identifier.                            |
+| `segment`     | uuid   | Segment UUID filter.                              |
+| `cohort`      | uuid   | Cohort UUID filter.                               |
+| `compare`     | string | Comparison mode (`prev` for previous period).     |
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/stats
+
+Returns high-level aggregate metrics for the given time range, including visitor counts, pageviews, session metrics, revenue totals, and comparison data.
+
+**Sample response**
+
+```json
+{
+  "pageviews": 15420,
+  "visitors": 4200,
+  "visits": 5600,
+  "bounces": 1800,
+  "totaltime": 984500,
+  "revenue": 12500.50,
+  "llmCost": 4.32,
+  "llmTokens": 1850000,
+  "llmAvgLatency": 340,
+  "comparison": {
+    "pageviews": 12100,
+    "visitors": 3500,
+    "visits": 4400,
+    "bounces": 1600,
+    "totaltime": 820000,
+    "revenue": 9800.00
+  }
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/pageviews
+
+Returns pageview, session, and revenue time series data bucketed by the specified `unit` (`hour`, `day`, etc.).
+
+**Sample response**
+
+```json
+{
+  "pageviews": [
+    { "x": "2026-02-01 00:00:00", "y": 142 },
+    { "x": "2026-02-02 00:00:00", "y": 215 }
+  ],
+  "sessions": [
+    { "x": "2026-02-01 00:00:00", "y": 95 },
+    { "x": "2026-02-02 00:00:00", "y": 140 }
+  ],
+  "revenue": [
+    { "x": "2026-02-01", "y": 350.00 },
+    { "x": "2026-02-02", "y": 520.50 }
+  ]
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/metrics
+
+Returns breakdown metrics for a specific dimension (`type`).
+
+**Parameters**
+
+| Parameter | Type   | Description                                                                                                   |
+| --------- | ------ | ------------------------------------------------------------------------------------------------------------- |
+| `type`    | string | **Required**. Dimension name (`path`, `referrer`, `browser`, `os`, `device`, `country`, `event`, `channel`).  |
+| `limit`   | number | (optional, default 500) Maximum number of records.                                                            |
+| `offset`  | number | (optional, default 0) Record offset.                                                                          |
+| `search`  | string | (optional) Filter results by search prefix.                                                                   |
+
+**Sample response**
+
+```json
+[
+  { "x": "Chrome", "y": 3120 },
+  { "x": "Safari", "y": 850 },
+  { "x": "Firefox", "y": 230 }
+]
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/metrics/batch
+
+Retrieves multiple metric dimensions concurrently in a single HTTP request by passing comma-separated types or array parameters.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/daterange
+
+Returns the earliest recorded event timestamp and the total recorded event count for the project.
+
+**Sample response**
+
+```json
+{
+  "startDate": "2025-06-01T00:00:00.000Z",
+  "endDate": "2026-02-20T18:00:00.000Z",
+  "count": 125400
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/active
+
+Returns the number of active visitors on the site within the last 5 minutes.
+
+**Sample response**
+
+```json
+{
+  "x": 24
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/channel
+
+Returns acquisition channels breakdown (e.g. Organic Search, Paid, Direct, Social, Referral).
+
+**Sample response**
+
+```json
+[
+  { "channel": "Direct", "visitors": 1240 },
+  { "channel": "Organic Search", "visitors": 980 },
+  { "channel": "Social", "visitors": 450 }
+]
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/values
+
+Returns distinct available values for a given dimension filter (such as `browser`, `os`, `country`, `url`, `referrer`, or custom event property).
+
+**Parameters**
+
+| Parameter | Type   | Description                                                                          |
+| --------- | ------ | ------------------------------------------------------------------------------------ |
+| `type`    | string | **Required**. The filter column or dimension (e.g. `url`, `browser`, `os`, `city`). |
+
+**Sample response**
+
+```json
+[
+  { "value": "Chrome" },
+  { "value": "Firefox" },
+  { "value": "Safari" }
+]
+```

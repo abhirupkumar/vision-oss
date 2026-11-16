@@ -1,0 +1,193 @@
+---
+title: Sending Stats
+---
+
+## POST NEXT_PUBLIC_API_URL/send
+
+Send analytics events, page views, visitor identities, and Web Vitals metrics directly to the ingestion pipeline.
+
+This endpoint is public and does not require an `Authorization` header. However, a valid `User-Agent` HTTP header must be included.
+
+**Endpoint**
+
+```text
+POST NEXT_PUBLIC_API_URL/send
+```
+
+**Parameters**
+
+| Field                | Type   | Description                                                                                     |
+| -------------------- | ------ | ----------------------------------------------------------------------------------------------- |
+| `type`               | string | **Required**. Event type: `event`, `identify`, or `performance`.                                |
+| `payload.project`    | string | **Required** (unless using `link` or `pixel`). The project ID.                                  |
+| `payload.link`       | string | Link UUID (alternative to `project`).                                                           |
+| `payload.pixel`      | string | Pixel UUID (alternative to `project`).                                                          |
+| `payload.url`        | string | Current page URL path (e.g. `/docs`).                                                           |
+| `payload.title`      | string | Page title.                                                                                     |
+| `payload.referrer`   | string | Referrer URL.                                                                                   |
+| `payload.hostname`   | string | Hostname (e.g. `myapp.com`).                                                                    |
+| `payload.language`   | string | Browser language (e.g. `en-US`).                                                                |
+| `payload.screen`     | string | Screen resolution (e.g. `1920x1080`).                                                           |
+| `payload.name`       | string | Custom event name (e.g. `button_click`, `subscribe`).                                           |
+| `payload.tag`        | string | Optional categorization tag.                                                                    |
+| `payload.id`         | string | Custom distinct visitor or session identifier.                                                  |
+| `payload.data`       | object | Arbitrary key-value metadata for the custom event.                                              |
+| `payload.lcp`        | number | Largest Contentful Paint (ms).                                                                  |
+| `payload.inp`        | number | Interaction to Next Paint (ms).                                                                 |
+| `payload.cls`        | number | Cumulative Layout Shift.                                                                        |
+| `payload.fcp`        | number | First Contentful Paint (ms).                                                                    |
+| `payload.ttfb`       | number | Time to First Byte (ms).                                                                        |
+| `payload.email`      | string | (for `identify` calls) Visitor email address.                                                   |
+| `payload.firstName`  | string | (for `identify` calls) Visitor first name.                                                      |
+| `payload.lastName`   | string | (for `identify` calls) Visitor last name.                                                       |
+| `payload.properties` | object | (for `identify` calls) Custom user profile traits.                                              |
+
+---
+
+### Page View / Custom Event Example
+
+```json
+{
+  "type": "event",
+  "payload": {
+    "project": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+    "hostname": "myapp.com",
+    "language": "en-US",
+    "referrer": "https://google.com",
+    "screen": "1920x1080",
+    "title": "Pricing Page",
+    "url": "/pricing",
+    "name": "view_pricing",
+    "data": {
+      "plan": "pro",
+      "billing": "annual"
+    }
+  }
+}
+```
+
+---
+
+### Identify Call Example
+
+```json
+{
+  "type": "identify",
+  "payload": {
+    "project": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+    "id": "usr_abc123",
+    "email": "jane@example.com",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "properties": {
+      "role": "Founder",
+      "companySize": "10-50"
+    }
+  }
+}
+```
+
+---
+
+### Web Vitals / Performance Example
+
+```json
+{
+  "type": "performance",
+  "payload": {
+    "project": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+    "url": "/dashboard",
+    "lcp": 1240,
+    "cls": 0.02,
+    "fcp": 890,
+    "ttfb": 150
+  }
+}
+```
+
+**Sample response**
+
+```json
+{
+  "cache": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/batch
+
+Send an array of events in a single HTTP request for high-throughput client flushes or server-side background queues.
+
+**Request body**
+
+A JSON array of event objects matching the `/send` payload format:
+
+```json
+[
+  {
+    "type": "event",
+    "payload": {
+      "project": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+      "url": "/pricing",
+      "name": "view_pricing"
+    }
+  },
+  {
+    "type": "event",
+    "payload": {
+      "project": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+      "url": "/checkout",
+      "name": "checkout_started"
+    }
+  }
+]
+```
+
+**Sample response**
+
+```json
+{
+  "size": 2,
+  "processed": 2,
+  "errors": 0,
+  "details": [],
+  "cache": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/errors
+
+Ingest client-side runtime errors and unhandled exceptions (batched up to 20 spans per request).
+
+**Request body**
+
+A JSON array of error objects:
+
+```json
+[
+  {
+    "project": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+    "errorType": "TypeError",
+    "message": "Cannot read properties of undefined (reading 'map')",
+    "filename": "https://myapp.com/assets/main.js",
+    "lineno": 142,
+    "colno": 28,
+    "stack": "TypeError: Cannot read properties of undefined...\n  at render (https://myapp.com/assets/main.js:142:28)",
+    "path": "/dashboard",
+    "hostname": "myapp.com",
+    "level": "error"
+  }
+]
+```
+
+**Sample response**
+
+```json
+{
+  "status": "ok",
+  "count": 1
+}
+```

@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vision-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vision
+      POSTGRES_USER: vision_user
+      POSTGRES_PASSWORD: vision_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vision_user -d vision"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3-alpine
+    container_name: vision-clickhouse
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: vision-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_started
+    environment:
+      PORT: 3001
+      DATABASE_URL: "postgresql://vision_user:vision_password@postgres:5432/vision"
+      CLICKHOUSE_URL: "http://clickhouse:8123"
+      DISABLE_BOT_CHECK: "false"
+      KAFKA_PRESENT: "false"
+      NEXT_PUBLIC_IS_CLOUD: "false"
+    ports:
+      - "3001:3001"
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: apps/dashboard/Dockerfile
+    container_name: vision-dashboard
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - postgres
+      - clickhouse
+    environment:
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: "http://localhost:3001"
+      NEXT_PUBLIC_IS_CLOUD: "false"
+      DATABASE_URL: "postgresql://vision_user:vision_password@postgres:5432/vision"
+      CLICKHOUSE_URL: "http://clickhouse:8123"
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
+  clickhouse_data:

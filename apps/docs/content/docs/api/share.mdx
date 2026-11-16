@@ -1,0 +1,46 @@
+---
+title: Share
+---
+
+Public project sharing allows you to expose read-only project analytics via a unique share URL or ID without requiring visitors to log in.
+
+**Endpoint**
+
+```text
+GET NEXT_PUBLIC_API_URL/share/:shareId
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/share/:shareId
+
+Retrieves public project details and settings using the project's unique `shareId`.
+
+This endpoint is public and does not require authentication.
+
+**Sample response**
+
+```json
+{
+  "id": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+  "name": "Public Project Dashboard",
+  "domain": "example.com",
+  "shareId": "my-shared-dashboard",
+  "createdAt": "2026-01-10T12:00:00.000Z",
+  "updatedAt": "2026-01-10T12:00:00.000Z"
+}
+```
+
+---
+
+## Configuring a Share ID
+
+You can enable or modify a project's `shareId` via `POST NEXT_PUBLIC_API_URL/projects/:projectId` by setting the `shareId` property:
+
+```json
+{
+  "shareId": "my-shared-dashboard"
+}
+```
+
+To revoke access, set `shareId: null`.

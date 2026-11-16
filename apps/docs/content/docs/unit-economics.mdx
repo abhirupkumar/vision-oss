@@ -1,0 +1,63 @@
+---
+title: Unit Economics & Metric Definitions
+---
+
+In AI applications, software margins are directly impacted by continuous model inference costs. Vision provides automated unit economics monitoring by reconciling payment data with token compute telemetry.
+
+## Key Financial Formulas
+
+### 1. Cost-to-Serve (CTS)
+Cost-to-Serve measures the total inference and infrastructure compute cost incurred to support an active user or feature interaction:
+
+```text
+CTS = Sum(Prompt Tokens × Input Price + Completion Tokens × Output Price)
+```
+
+Tracking CTS allows finance and engineering teams to identify which customer workflows or templates are driving model expenses.
+
+### 2. Gross Margin per User
+Gross Margin per User represents the net contribution of each customer account after deducting their direct model compute cost:
+
+```text
+Gross Margin (User) = Attributed Revenue - Inference Cost
+```
+
+Accounts with negative gross margins indicate that heavy prompt usage exceeds their subscription billing tier.
+
+### 3. Blended Gross Margin Percentage
+The overall financial health of your AI platform:
+
+```text
+Gross Margin % = ((Total Attributed Revenue - Total AI Inference Cost) / Total Attributed Revenue) × 100
+```
+
+Sustainable generative AI SaaS products typically target a gross margin of **70% to 85%**.
+
+### 4. AI ROI Ratio
+Measures revenue generated relative to model inference investment:
+
+```text
+AI ROI = (Net Expansion + New MRR Driven by AI Features) / Total Model Compute Cost
+```
+
+A ratio of **5x or higher** demonstrates strong commercial return on model spending.
+
+### 5. Inference Payback Velocity
+Calculates how many months of customer gross margin are needed to amortize customer acquisition cost (CAC):
+
+```text
+Payback Months = CAC / (Monthly Revenue per User - Monthly CTS)
+```
+
+---
+
+## Margin Health Distribution
+
+Vision automatically classifies accounts into 4 margin tiers:
+
+| Tier | Gross Margin | Operational Action |
+|:---|:---|:---|
+| **Unprofitable** | Negative (&lt; 0%) | Model cost exceeds revenue. Trigger rate limiting, model downgrades, or quota alerts. |
+| **At Risk** | 0% - 50% | Low margin. Investigate prompt caching or template optimization. |
+| **Healthy** | 50% - 80% | Sustainable standard software margin. |
+| **High Margin** | Above 80% | Exceptional unit economics. Candidates for account expansion and upsell. |

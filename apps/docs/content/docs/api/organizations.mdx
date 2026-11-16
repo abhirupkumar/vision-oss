@@ -1,0 +1,210 @@
+---
+title: Organizations
+---
+
+Operations for managing multi-user organizations, memberships, invites, and organization-scoped projects.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/organizations
+POST NEXT_PUBLIC_API_URL/organizations
+POST NEXT_PUBLIC_API_URL/organizations/join
+GET NEXT_PUBLIC_API_URL/organizations/validate-slug
+GET NEXT_PUBLIC_API_URL/organizations/:organizationId
+POST NEXT_PUBLIC_API_URL/organizations/:organizationId
+DELETE NEXT_PUBLIC_API_URL/organizations/:organizationId
+GET NEXT_PUBLIC_API_URL/organizations/:organizationId/users
+POST NEXT_PUBLIC_API_URL/organizations/:organizationId/users
+DELETE NEXT_PUBLIC_API_URL/organizations/:organizationId/users/:userId
+GET NEXT_PUBLIC_API_URL/organizations/:organizationId/projects
+POST NEXT_PUBLIC_API_URL/organizations/:organizationId/projects
+GET NEXT_PUBLIC_API_URL/organizations/:organizationId/invites
+POST NEXT_PUBLIC_API_URL/organizations/:organizationId/invites
+DELETE NEXT_PUBLIC_API_URL/organizations/:organizationId/invites/:inviteId
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/organizations
+
+Returns all organizations the authenticated user belongs to.
+
+**Sample response**
+
+```json
+{
+  "data": [
+    {
+      "id": "org_987654321",
+      "name": "Acme Corp",
+      "slug": "acme-corp",
+      "accessCode": "acme-join-code",
+      "logoUrl": null,
+      "createdAt": "2026-01-10T12:00:00.000Z",
+      "updatedAt": "2026-01-10T12:00:00.000Z",
+      "role": "owner"
+    }
+  ],
+  "count": 1,
+  "page": 1,
+  "pageSize": 10
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/organizations
+
+Creates a new organization.
+
+**Request body**
+
+| Property | Type   | Description                                       |
+| -------- | ------ | ------------------------------------------------- |
+| `name`   | string | **Required**. Organization name (max 100 chars).  |
+| `slug`   | string | **Required**. URL slug identifier (e.g. `acme`).  |
+
+```json
+{
+  "name": "Acme Corp",
+  "slug": "acme-corp"
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/organizations/join
+
+Joins an existing organization using a shared access code.
+
+**Request body**
+
+| Property     | Type   | Description                                  |
+| ------------ | ------ | -------------------------------------------- |
+| `accessCode` | string | **Required**. Organization join access code. |
+
+```json
+{
+  "accessCode": "acme-join-code"
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/organizations/validate-slug
+
+Checks if an organization slug is available.
+
+**Parameters**
+
+| Parameter | Type   | Description                 |
+| --------- | ------ | --------------------------- |
+| `slug`    | string | **Required**. Proposed slug.|
+
+**Sample response**
+
+```json
+{
+  "available": true
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/organizations/:organizationId
+
+Fetches organization details by ID.
+
+---
+
+## POST NEXT_PUBLIC_API_URL/organizations/:organizationId
+
+Updates organization name or slug.
+
+**Request body**
+
+```json
+{
+  "name": "Acme Global"
+}
+```
+
+---
+
+## DELETE NEXT_PUBLIC_API_URL/organizations/:organizationId
+
+Permanently deletes the organization and disassociates its projects. Requires organization owner permissions.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/organizations/:organizationId/users
+
+Returns a list of members in the organization and their assigned roles (`owner`, `admin`, `member`, `view-only`).
+
+**Sample response**
+
+```json
+[
+  {
+    "id": "member_123",
+    "userId": "user_456",
+    "role": "admin",
+    "user": {
+      "id": "user_456",
+      "email": "teammate@example.com",
+      "displayName": "Teammate"
+    }
+  }
+]
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/organizations/:organizationId/users
+
+Adds or updates an organization member.
+
+**Request body**
+
+```json
+{
+  "email": "colleague@example.com",
+  "role": "member"
+}
+```
+
+---
+
+## DELETE NEXT_PUBLIC_API_URL/organizations/:organizationId/users/:userId
+
+Removes a member from the organization.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/organizations/:organizationId/projects
+
+Returns all projects associated with this organization.
+
+---
+
+## POST NEXT_PUBLIC_API_URL/organizations/:organizationId/projects
+
+Creates a project directly under the organization.
+
+**Request body**
+
+```json
+{
+  "name": "Docs Site",
+  "domain": "docs.example.com"
+}
+```
+
+---
+
+## Invites
+
+- `GET NEXT_PUBLIC_API_URL/organizations/:organizationId/invites`: List pending organization invitations.
+- `POST NEXT_PUBLIC_API_URL/organizations/:organizationId/invites`: Send an invite by email with a target role.
+- `DELETE NEXT_PUBLIC_API_URL/organizations/:organizationId/invites/:inviteId`: Revoke an invitation.

@@ -1,0 +1,141 @@
+---
+title: Tracker configuration
+---
+
+The Vision tracker provides several properties that allow you to configure its behavior.
+
+### data-host-url
+
+By default, Vision will send data to wherever the script is located. You can override this to send data
+to another location.
+
+```html
+<script
+  defer
+  src="NEXT_PUBLIC_TRACKER_URL/script.js"
+  data-project-id="your-project-id"
+  data-host-url="NEXT_PUBLIC_API_URL"
+></script>
+```
+
+### data-auto-track
+
+By default, Vision automatically tracks all pageviews and autocaptures user interactions (clicks on buttons, links, textareas, inputs, labels, form submissions, input changes, contenteditable edits, and clipboard copies) as `$autocapture` events.
+
+If `data-auto-track` is set to `"false"`, Vision will **not** track any automatic events. You can still track events manually using the [tracker functions](/docs/tracker-functions).
+
+```html
+<script
+  defer
+  src="NEXT_PUBLIC_TRACKER_URL/script.js"
+  data-project-id="your-project-id"
+  data-auto-track="false"
+></script>
+```
+
+You can also add `data-vision-ignore` to individual HTML elements to exclude them from autocapture.
+
+### data-domains
+
+If you want the tracker to only run on specific domains, you can add them to your tracker script. This is a comma delimited list of domain names. Each value matches against `window.location.hostname`, so you should double check if your website uses `www` or not.
+Helps if you are working in a staging/development environment.
+
+```html
+<script
+  defer
+  src="NEXT_PUBLIC_TRACKER_URL/script.js"
+  data-project-id="your-project-id"
+  data-domains="example.com,www.example.com"
+></script>
+```
+
+### data-tag
+
+Group events under a named tag for filtering and A/B testing. See [Tags](/docs/tags) for more details.
+
+```html
+<script
+  defer
+  src="NEXT_PUBLIC_TRACKER_URL/script.js"
+  data-project-id="your-project-id"
+  data-tag="homepage-layout-a"
+></script>
+```
+
+### data-performance
+
+Enable automatic collection of [Core Web Vitals](https://web.dev/articles/vitals) from your visitors' browsers. See [Performance](/docs/performance) for more details.
+
+```html
+<script
+  defer
+  src="NEXT_PUBLIC_TRACKER_URL/script.js"
+  data-project-id="your-project-id"
+  data-performance="true"
+></script>
+```
+
+### data-exclude-search
+
+If you don't want to collect search parameters from the URL.
+
+```html
+<script
+  defer
+  src="NEXT_PUBLIC_TRACKER_URL/script.js"
+  data-project-id="your-project-id"
+  data-exclude-search="true"
+></script>
+```
+
+### data-exclude-hash
+
+If you don't want to collect the hash value from the URL.
+
+```html
+<script
+  defer
+  src="NEXT_PUBLIC_TRACKER_URL/script.js"
+  data-project-id="your-project-id"
+  data-exclude-hash="true"
+></script>
+```
+
+### data-do-not-track
+
+Respect user's [Do Not Track](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/doNotTrack) browser setting.
+
+```html
+<script
+  defer
+  src="NEXT_PUBLIC_TRACKER_URL/script.js"
+  data-project-id="your-project-id"
+  data-do-not-track="true"
+></script>
+```
+
+### data-before-send
+
+Allows you to specify a function that will be called before data is sent.
+You can then inspect and modify the payload or cancel the send entirely.
+The function will take two parameters, type and payload.
+To continue with sending, you return a payload object.
+To cancel the send, return a false-y value.
+
+```javascript
+function beforeSendHandler(type, payload) {
+  if (checkPayload(payload)) {
+    return payload;
+  }
+  return false;
+}
+```
+
+```html
+<script
+  defer
+  src="NEXT_PUBLIC_TRACKER_URL/script.js"
+  data-project-id="your-project-id"
+  data-before-send="beforeSendHandler"
+></script>
+```

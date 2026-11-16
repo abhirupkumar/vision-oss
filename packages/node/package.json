@@ -1,0 +1,16 @@
+{
+  "name": "@vision/node",
+  "version": "1.0.0",
+  "description": "Vision Analytics Node.js SDK",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w"
+  },
+  "peerDependencies": {},
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,50 @@
+---
+title: Node Client
+---
+
+## Overview
+
+The Vision Node.js client allows you to record server-side page views and custom events from backend services, API handlers, or worker processes.
+
+## Installation
+
+```shell
+npm install @vision/node
+```
+
+## Usage
+
+Initialize the client with your `projectId`:
+
+```javascript
+import { VisionAnalytics } from "@vision/node";
+
+const vision = new VisionAnalytics({
+  projectId: "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+  host: process.env.NEXT_PUBLIC_API_URL,
+});
+
+await vision.track({
+  url: "/checkout/success",
+  title: "Checkout Success",
+  name: "purchase",
+  data: {
+    plan: "pro",
+    amount: 49.0,
+  },
+});
+```
+
+### Track Parameters
+
+The properties you can send using `.track()` are:
+
+- **url**: Page path (e.g. `/home`).
+- **title**: Page or event title.
+- **name**: Custom event name.
+- **data**: Key-value metadata for the custom event.
+- **hostname**: Hostname of the application.
+- **language**: Client language (e.g. `en-US`).
+- **referrer**: Referrer URL.
+- **screen**: Screen dimensions (e.g. `1920x1080`).
+- **tag**: Custom tag for categorization.

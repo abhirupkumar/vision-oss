@@ -1,0 +1,84 @@
+---
+title: Track 2 - High-Throughput Streaming
+description: Scale Vision Community Edition to 10M+ events per month using Kafka buffering.
+---
+
+When scaling beyond 10M+ events per month, direct database writes can cause connection contention during traffic spikes. The **High-Throughput Streaming Track** inserts a Kafka message bus between the edge ingestion API and ClickHouse.
+
+## Architecture Overview
+
+```text
+Client SDKs / Apps
+       │  HTTP POST /send
+       ▼
+apps/backend (Hono Ingestion API)
+       │  HTTP POST (Kafka REST Proxy)
+       ▼
+Aiven / Self-Hosted Kafka Cluster
+       ├── Topic: events      (project_event, llm_events)
+       ├── Topic: properties  (event_data, visitor_data)
+       ├── Topic: telemetry   (project_error, ab_tests)
+       ├── Topic: business    (project_revenue)
+       └── Topic: replays     (session_replay)
+       │
+       ▼
+apps/ingestion-worker (Consumer Group: vision-ingestion-group)
+       │  Micro-Batch Flush (up to 10,000 rows / 5s)
+       ▼
+ClickHouse Analytics Database
+```
+
+---
+
+## 1. Kafka Setup (Aiven or Self-Hosted)
+
+### Required Topics
+Create the following 5 physical Kafka topics with appropriate partition counts (minimum 3 partitions recommended):
+
+| Topic Name | Purpose | Multiplexed Stream Types |
+| :--- | :--- | :--- |
+| `events` | High-frequency telemetry | `project_event`, `llm_events` |
+| `properties` | Custom trait dictionaries | `event_data`, `visitor_data` |
+| `telemetry` | Exceptions & experiments | `project_error`, `ab_test_session` |
+| `business` | Revenue & conversions | `project_revenue` |
+| `replays` | Chunked mutation streams | `session_replay` |
+
+---
+
+## 2. Environment Configuration
+
+In your backend and worker `.env`:
+
+```bash
+# Enable Kafka REST proxy mode
+KAFKA_PRESENT=true
+KAFKA_REST_URL=https://user:password@kafka-rest-proxy.example.com:443
+KAFKA_USERNAME=your_username
+KAFKA_PASSWORD=your_password
+
+# ClickHouse connection
+CLICKHOUSE_URL=http://clickhouse:8123
+```
+
+---
+
+## 3. Launching the Ingestion Worker
+
+Build and start the ingestion consumer:
+
+```bash
+pnpm --filter @vision/ingestion-worker build
+node apps/ingestion-worker/dist/index.js
+```
+
+Or run via Docker:
+
+```bash
+docker run -d \
+  --name vision-ingestion-worker \
+  --restart unless-stopped \
+  --env-file .env \
+  vision-ingestion-worker:latest
+```
+
+The consumer group `vision-ingestion-group` will subscribe to all 5 topics and flush batched inserts to ClickHouse every 5 seconds.

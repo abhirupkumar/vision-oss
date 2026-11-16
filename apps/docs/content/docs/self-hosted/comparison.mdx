@@ -1,0 +1,33 @@
+---
+title: Community vs. Vision Cloud
+description: A detailed comparison between Vision Community Edition (Self-Hosted) and Vision Cloud.
+---
+
+Vision follows an **Open-Core** philosophy. Core web tracking, session recordings, error monitoring, and LLM proxies are 100% open-source and unmetered. 
+
+Vision Cloud provides automated multi-tenant scaling, edge latency optimization, and financial AI intelligence for revenue-generating startups.
+
+| Feature / Capability | Vision Community (Self-Hosted) | Vision Cloud (Managed) | Why Teams Choose Cloud |
+| :--- | :---: | :---: | :--- |
+| **Pricing** | Free (Your Server Bill) | **$39/mo Base** (Includes $39 Credit) | 100% of base fee returned in usage credit; cheaper than managing cloud servers. |
+| **Global Ingestion Latency** | Single-region server (200–400ms global) | **Cloudflare Global Edge** (Sub-10ms) | Zero dropped events on mobile networks, instant page load. |
+| **ClickHouse Infrastructure** | Self-managed sharding & disk cleanups | **Serverless ClickHouse / Tinybird** | Zero disk-full panics or cluster maintenance. |
+| **Web & Product Analytics** | Unlimited websites & events | Unlimited websites & events | Identical tracking capabilities. |
+| **Session Replay** | Stored locally in ClickHouse/S3 | Global streaming replay CDN | Infinite retention tiering without disk management. |
+| **LLM Proxy Tracing** | Included (Local token logging) | Included (Sub-millisecond streaming) | Tracing for OpenAI, Anthropic, Gemini, Groq. |
+| **Live Customer Gross Margin Engine** | Excluded | **Included** (Stripe/Paddle + LLM Token Join) | Detects unprofitable customers where token costs exceed subscription revenue. |
+| **AI Bill-Shock & Anomaly Alerts**| Excluded | **Included** (Slack, Discord, Email) | Alerts you when AI agent loops spike costs before bills explode. |
+| **MCP Server for Cursor & Claude** | Excluded | **Included** (Full 6-tool `@vision/mcp`) | Autonomous coding agents query live metrics directly in your IDE. |
+| **In-App Autonomous AI Chatbot** | Excluded | **Included** (BYOK: Gemini, OpenAI, Claude) | Natural language root-cause analysis across dropoffs and errors. |
+| **Managed Billing & Lockouts** | Excluded (No lockouts) | **Turnkey Managed Billing** (Dodo Payments) | Automated merchant-of-record integration and spending caps. |
+
+---
+
+## When Should You Migrate to Vision Cloud?
+
+We encourage teams to start on **Community Edition** during early prototyping. Most teams migrate to **Vision Cloud** when:
+
+1. **Traffic exceeds 500,000 monthly events**: Disk space and ClickHouse maintenance begin costing more in engineering time than the $39/month Cloud plan.
+2. **You ship customer-facing AI agents**: You need the **Customer Gross Margin Engine** to ensure high-usage users aren't bankrupting your product.
+3. **You need cost insurance**: You cannot afford to wake up to a $4,000 runaway OpenAI bill because an autonomous agent entered an unhandled recursive loop.
+4. **Your engineering team uses Cursor or Claude Desktop**: You want AI agents to query live production traces and error rates via `@vision/mcp`.

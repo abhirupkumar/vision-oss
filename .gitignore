@@ -1,0 +1,87 @@
+node_modules
+dist
+.turbo
+
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+.pnp
+.pnp.js
+.pnpm-store
+package-lock.json
+
+**/dist
+dist-ssr
+*.local
+.env
+**/.nitro
+**/.tanstack
+**/.wrangler
+**/.output
+**/.vinxi
+**/__unconfig*
+**/todos.json
+**/.tinyb
+
+# testing
+/coverage
+
+# next.js
+/dashboard/.next
+/dashboard/out
+
+# production
+/dashboard/build
+/dashboard/geo
+/dashboard/dist
+/dashboard/generated
+/dashboard/src/generated
+
+# misc
+.DS_Store
+.idea
+.yarn
+*.iml
+*.log
+.vscode
+.tool-versions
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env
+.env.*
+*.env.*
+
+*.dev.yml
+
+plan.md
+
+# Cloudflare Workers / Wrangler
+.dev.vars
+**/.wrangler/
+
+# OpenNext (Dashboard Deployment)
+**/.open-next
+.open-next/
+
+# Next.js
+**/.next
+**/out
+**/.clerk
+
+# TypeScript
+*.tsbuildinfo
+
+# Misc
+.eslintcache
+.nyc_output
+.vercel
+.env*
+!*.example
+!docker/.env.oss.example

@@ -1,0 +1,76 @@
+---
+title: Payment Connections
+---
+
+Manage integrations with payment providers (Stripe, LemonSqueezy, Paddle, Polar) for automatic revenue sync.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/payment-connections
+POST NEXT_PUBLIC_API_URL/payment-connections
+GET NEXT_PUBLIC_API_URL/payment-connections/:id
+DELETE NEXT_PUBLIC_API_URL/payment-connections/:id
+POST NEXT_PUBLIC_API_URL/webhooks/payments/:provider
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/payment-connections
+
+Lists all active payment gateway connections configured for your account.
+
+**Sample response**
+
+```json
+[
+  {
+    "id": "conn_stripe_1",
+    "provider": "stripe",
+    "organizationId": null,
+    "createdAt": "2026-01-10T12:00:00.000Z"
+  }
+]
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/payment-connections
+
+Connects a new payment provider integration.
+
+**Request body**
+
+| Property         | Type   | Description                                                           |
+| ---------------- | ------ | --------------------------------------------------------------------- |
+| `provider`       | string | **Required**. Payment provider: `stripe`, `lemonsqueezy`, `paddle`, or `polar`. |
+| `apiKey`         | string | **Required**. Gateway API key or restricted secret key.               |
+| `webhookSecret`  | string | (optional) Gateway webhook signing secret.                            |
+| `organizationId` | string | (optional) Organization ID to associate with.                         |
+
+---
+
+## GET NEXT_PUBLIC_API_URL/payment-connections/:id
+
+Retrieves details for a specific payment provider connection.
+
+---
+
+## DELETE NEXT_PUBLIC_API_URL/payment-connections/:id
+
+Disconnects and removes the specified payment gateway integration.
+
+---
+
+## POST NEXT_PUBLIC_API_URL/webhooks/payments/:provider
+
+Public ingestion webhook endpoint for automated transaction and subscription sync from payment providers.
+
+**Supported Providers (`:provider`)**
+
+- `stripe`: Validates `stripe-signature` header using your configured webhook secret.
+- `lemonsqueezy`: Validates `x-signature` HMAC SHA256 header.
+- `paddle`: Validates `paddle-signature` header.
+- `polar`: Validates `webhook-signature` header.
+
+When a transaction event occurs (such as `checkout.session.completed`, `order_created`, or `subscription.created`), the provider sends payload data to this endpoint. Vision automatically verifies the signature against active connection credentials and reconciles revenue attribution.

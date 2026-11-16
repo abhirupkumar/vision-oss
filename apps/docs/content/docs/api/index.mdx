@@ -1,0 +1,45 @@
+---
+title: Overview
+---
+
+Vision provides a comprehensive REST API that allows you to manage projects, organizations, reports, and retrieve real-time analytics data programmatically. Any operation supported in the dashboard is accessible via the API. All data is exchanged in JSON format.
+
+## Base URL
+
+All API requests are sent to the Vision API endpoint:
+
+```text
+NEXT_PUBLIC_API_URL
+```
+
+For example, in local development this is typically `http://localhost:3001`, and in production it is your configured API domain (e.g. `https://api.yourdomain.com`).
+
+## Authentication
+
+All protected API endpoints require a valid Clerk session Bearer token in the `Authorization` header:
+
+```http
+Authorization: Bearer <clerk_session_token>
+```
+
+Refer to the [Authentication](/docs/api/authentication) guide for detailed instructions on acquiring and verifying tokens.
+
+## Ingestion Endpoints
+
+Sending client-side page views, custom events, and session replay chunks does not require user authentication. Event data is transmitted directly to the public ingestion routes:
+
+```text
+POST NEXT_PUBLIC_API_URL/send      # Single event, pageview, identify, or performance payload
+POST NEXT_PUBLIC_API_URL/batch     # Batch array of events
+POST NEXT_PUBLIC_API_URL/record    # Session replay DOM mutation recording chunks
+POST NEXT_PUBLIC_API_URL/errors    # Runtime client error spans
+```
+
+Client trackers are served from:
+
+```text
+GET NEXT_PUBLIC_TRACKER_URL/script.js    # Core analytics & autocapture tracker
+GET NEXT_PUBLIC_TRACKER_URL/recorder.js  # Session replay recorder
+```
+
+For more details on payload specifications and event structure, see [Sending stats](/docs/api/sending-stats) and [Session Replays](/docs/api/replays).

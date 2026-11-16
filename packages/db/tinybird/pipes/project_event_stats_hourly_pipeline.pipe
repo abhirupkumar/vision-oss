@@ -1,0 +1,49 @@
+DESCRIPTION >
+    Materialized view that pre-aggregates project_event into hourly buckets.
+    Used by getProjectSessions, getProjectStats, getWeeklyTraffic, etc.
+    when no event-column filters are applied (fast path).
+
+NODE project_event_stats_hourly_mv
+SQL >
+    SELECT
+        project_id,
+        visitor_id,
+        session_id,
+        hostname,
+        browser,
+        os,
+        device,
+        screen,
+        language,
+        country,
+        region,
+        city,
+        event_type,
+        event_name,
+        tag,
+        toStartOfHour(project_event.created_at) AS created_at,
+        min(project_event.created_at)           AS min_time,
+        max(project_event.created_at)           AS max_time,
+        count()                   AS views,
+        uniq(session_id)            AS visits
+    FROM project_event
+    GROUP BY
+        project_id,
+        visitor_id,
+        session_id,
+        hostname,
+        browser,
+        os,
+        device,
+        screen,
+        language,
+        country,
+        region,
+        city,
+        event_type,
+        event_name,
+        tag,
+        toStartOfHour(project_event.created_at)
+
+TYPE materialized
+DATASOURCE project_event_stats_hourly

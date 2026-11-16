@@ -1,0 +1,156 @@
+---
+title: Events
+---
+
+Operations around Custom Events and Event Data properties.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/projects/:projectId/events
+GET NEXT_PUBLIC_API_URL/projects/:projectId/events/series
+GET NEXT_PUBLIC_API_URL/projects/:projectId/event-data/events
+GET NEXT_PUBLIC_API_URL/projects/:projectId/event-data/fields
+GET NEXT_PUBLIC_API_URL/projects/:projectId/event-data/properties
+GET NEXT_PUBLIC_API_URL/projects/:projectId/event-data/values
+GET NEXT_PUBLIC_API_URL/projects/:projectId/event-data/stats
+GET NEXT_PUBLIC_API_URL/projects/:projectId/event-data/:eventId
+```
+
+---
+
+## Filters
+
+Event endpoints support common query parameters:
+
+| Parameter     | Type   | Description                    |
+| ------------- | ------ | ------------------------------ |
+| `startAt`     | number | Start time in milliseconds.    |
+| `endAt`       | number | End time in milliseconds.      |
+| `url`         | string | URL path.                      |
+| `referrer`    | string | Referrer URL or domain.        |
+| `title`       | string | Page title.                    |
+| `query`       | string | Query parameter.               |
+| `browser`     | string | Browser name.                  |
+| `os`          | string | Operating system name.         |
+| `device`      | string | Device category.               |
+| `country`     | string | Country code.                  |
+| `region`      | string | Region name.                   |
+| `city`        | string | City name.                     |
+| `language`    | string | Language code.                 |
+| `tag`         | string | Custom tag.                    |
+| `event`       | string | Event name.                    |
+| `segment`     | uuid   | Segment UUID.                  |
+| `cohort`      | uuid   | Cohort UUID.                   |
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/events
+
+Returns a list of event log entries for the project matching the filter criteria.
+
+**Sample response**
+
+```json
+[
+  {
+    "id": "e5b8d223-42e1-4c6d-97e3-13837ad57088",
+    "sessionId": "4bb4df47-aa72-4638-b7eb-d1cf3d84a7e9",
+    "visitorId": "f7841c2a-9f50-4822-ba35-15a968eb1a47",
+    "urlPath": "/pricing",
+    "eventName": "click-checkout",
+    "createdAt": "2026-02-15T14:32:00.000Z"
+  }
+]
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/events/series
+
+Returns time series counts of events bucketed by unit (`hour`, `day`).
+
+**Sample response**
+
+```json
+[
+  { "t": "2026-02-15 00:00:00", "y": 45 },
+  { "t": "2026-02-15 01:00:00", "y": 72 }
+]
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/event-data/events
+
+Returns the list of custom event names along with their total frequency and unique visitor counts.
+
+**Sample response**
+
+```json
+[
+  { "eventName": "signup_clicked", "total": 240, "uniqueVisitors": 180 },
+  { "eventName": "demo_requested", "total": 65, "uniqueVisitors": 60 }
+]
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/event-data/fields
+
+Returns all dynamic custom property keys attached to events (e.g. `plan`, `price`, `buttonColor`).
+
+**Sample response**
+
+```json
+[
+  { "propertyName": "plan", "dataType": "string" },
+  { "propertyName": "amount", "dataType": "number" }
+]
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/event-data/properties
+
+Returns aggregate counts and distributions for event property keys and values.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/event-data/values
+
+Returns the distinct values recorded for a specific event property name.
+
+**Parameters**
+
+| Parameter      | Type   | Description                                     |
+| -------------- | ------ | ----------------------------------------------- |
+| `propertyName` | string | **Required**. Name of property to query values. |
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/event-data/stats
+
+Returns aggregate numeric statistics (total events, distinct values, records with custom data) across custom event properties.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/event-data/:eventId
+
+Returns all property key-value pairs recorded for a single event record.
+
+**Sample response**
+
+```json
+[
+  {
+    "id": "prop_1",
+    "eventId": "e5b8d223-42e1-4c6d-97e3-13837ad57088",
+    "propertyName": "plan",
+    "dataType": 1,
+    "stringValue": "pro",
+    "numberValue": null,
+    "dateValue": null
+  }
+]
+```

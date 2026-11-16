@@ -1,0 +1,63 @@
+SCHEMA >
+    `id`                        String                               `json:$.id`,
+    `project_id`                String                               `json:$.project_id`,
+    `session_id`                String          DEFAULT ''           `json:$.session_id`,
+    `visitor_id`                String          DEFAULT ''           `json:$.visitor_id`,
+    `trace_id`                  String          DEFAULT ''           `json:$.trace_id`,
+    `parent_event_id`           String          DEFAULT ''           `json:$.parent_event_id`,
+    `span_type`                 String          DEFAULT 'generation' `json:$.span_type`,
+    `model`                     String                               `json:$.model`,
+    `provider`                  String                               `json:$.provider`,
+    `prompt_tokens`             Nullable(Int64)                      `json:$.prompt_tokens`,
+    `completion_tokens`         Nullable(Int64)                      `json:$.completion_tokens`,
+    `total_tokens`              Nullable(Int64)                      `json:$.total_tokens`,
+    `latency_ms`                UInt32          DEFAULT 0            `json:$.latency_ms`,
+    `cost`                      Nullable(Float64)                    `json:$.cost`,
+    `cost_details`              String          DEFAULT ''           `json:$.cost_details`,
+    `payload`                   Nullable(String) DEFAULT ''          `json:$.payload`,
+    `response`                  Nullable(String) DEFAULT ''          `json:$.response`,
+    `metadata`                  String          DEFAULT '{}'         `json:$.metadata`,
+    `tool_calls`                String          DEFAULT '[]'         `json:$.tool_calls`,
+    `tool_definitions`          String          DEFAULT '[]'         `json:$.tool_definitions`,
+    `created_at`                DateTime64(3, 'UTC')                 `json:$.created_at`,
+    `status`                    String          DEFAULT ''           `json:$.status`,
+    `error_message`             String          DEFAULT ''           `json:$.error_message`,
+    `template_name`             String          DEFAULT ''           `json:$.template_name`,
+    `score`                     Nullable(Float64)                    `json:$.score`,
+    `ttft_ms`                   Nullable(Int64)                      `json:$.ttft_ms`,
+    -- New fields (v2 — proxy architecture)
+    `name`                      String          DEFAULT ''           `json:$.name`,
+    `level`                     String          DEFAULT 'default'    `json:$.level`,
+    `start_time`                Nullable(DateTime64(3, 'UTC'))        `json:$.start_time`,
+    `end_time`                  Nullable(DateTime64(3, 'UTC'))        `json:$.end_time`,
+    `completion_start_time`     Nullable(DateTime64(3, 'UTC'))        `json:$.completion_start_time`,
+    `user_id`                   String          DEFAULT ''           `json:$.user_id`,
+    `environment`               String          DEFAULT ''           `json:$.environment`,
+    `release`                   String          DEFAULT ''           `json:$.release`,
+    `version`                   String          DEFAULT ''           `json:$.version`,
+    `tags`                      String          DEFAULT '[]'         `json:$.tags`,
+    `model_parameters`          String          DEFAULT '{}'         `json:$.model_parameters`,
+    `request_path`              String          DEFAULT ''           `json:$.request_path`,
+    `usage_unit`                String          DEFAULT 'tokens'     `json:$.usage_unit`,
+    `prompt_cache_read_tokens`  Nullable(Int64)                      `json:$.prompt_cache_read_tokens`,
+    `prompt_cache_write_tokens` Nullable(Int64)                      `json:$.prompt_cache_write_tokens`,
+    `reasoning_tokens`          Nullable(Int64)                      `json:$.reasoning_tokens`,
+    `usage_details`             String          DEFAULT '{}'         `json:$.usage_details`,
+    `input_cost`                Nullable(Float64)                    `json:$.input_cost`,
+    `output_cost`               Nullable(Float64)                    `json:$.output_cost`,
+    `http_status_code`          Nullable(Int32)                      `json:$.http_status_code`,
+    `error_code`                String          DEFAULT ''           `json:$.error_code`,
+    `prompt_id`                 String          DEFAULT ''           `json:$.prompt_id`,
+    `prompt_version`            Nullable(Int32)                      `json:$.prompt_version`,
+    `scores`                    String          DEFAULT '[]'         `json:$.scores`,
+    `country_code`              String          DEFAULT ''           `json:$.country_code`,
+    `body_truncated`            UInt8           DEFAULT 0            `json:$.body_truncated`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(created_at)"
+ENGINE_SORTING_KEY "project_id, trace_id, created_at"
+ENGINE_TTL "toDateTime(created_at) + toIntervalMonth(6)"
+
+FORWARD_QUERY > 
+    SELECT id, project_id, session_id, visitor_id, trace_id, parent_event_id, span_type, model, provider, prompt_tokens, completion_tokens, total_tokens, latency_ms, cost, cost_details, defaultValueOfTypeName('Nullable(String)') AS payload, defaultValueOfTypeName('Nullable(String)') AS response, metadata, tool_calls, tool_definitions, created_at, status, error_message, template_name, score, ttft_ms, name, level, start_time, end_time, completion_start_time, user_id, environment, release, version, tags, model_parameters, request_path, usage_unit, prompt_cache_read_tokens, prompt_cache_write_tokens, reasoning_tokens, usage_details, input_cost, output_cost, http_status_code, error_code, prompt_id, prompt_version, scores, country_code, body_truncated
+

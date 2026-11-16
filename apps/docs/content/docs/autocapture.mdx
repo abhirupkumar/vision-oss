@@ -1,0 +1,285 @@
+---
+title: Autocapture & Identity
+---
+
+Autocapture allows Vision to automatically collect pageviews, client-side route changes, button clicks, form submissions, and text inputs without requiring you to manually write tracking code for every interaction.
+
+This guide explains how autocapture operates, how Vision resolves anonymous and identified users, and how to configure Vision with autocapture **enabled** or **disabled** using both the **HTML script tag** and the **JavaScript/TypeScript SDK**.
+
+---
+
+## What Autocapture Tracks
+
+When autocapture is enabled, Vision automatically observes:
+
+1. **Initial Pageviews:** Automatically sent as soon as the DOM is ready.
+2. **SPA / Client-Side Navigation:** Automatically listens to `history.pushState`, `history.replaceState`, and `popstate` to record page changes in single-page apps (Next.js, React, Vue, Svelte).
+3. **Button & Link Clicks:** Automatically captures clicks on interactive elements, preserving link labels, element IDs, and tag names.
+4. **Form Interactions:** Captures form submissions (`submit`) and input blur/change events (sensitive input fields like passwords are automatically ignored).
+5. **Clipboard Activity:** Captures copy events with truncated text lengths.
+
+---
+
+## Scenario A: Autocapture Enabled (Default)
+
+In this scenario, autocapture is active. Vision tracks the user's entire pre-login journey (e.g. ad clicks, landing pages, signup button clicks) and **seamlessly merges** their anonymous history into their identified profile once they log in.
+
+### How Identity Resolution Works
+
+1. **Synchronous Browser Persistence:**  
+   On script load, Vision synchronously loads any existing identity from browser `localStorage` (`sigma.identity.<projectId>`).
+   - **Returning users:** The initial pageview is sent **immediately with their user ID attached**, eliminating race conditions with asynchronous authentication checks (e.g., asynchronous session checks or token verification).
+   - **First-time visitors:** An anonymous profile is derived server-side.
+2. **Identity Stitching on Login:**  
+   When `vision.identify(userId, traits)` is called:
+   - The tracker detects that an anonymous visitor just identified.
+   - Vision sends the new `userId` along with `anonId` (the previous anonymous visitor ID).
+   - The server **retroactively transfers** all pre-login events, pageviews, and session replays from the anonymous profile to the newly identified user profile.
+   - You see **one unified profile** in the dashboard with the complete visitor history.
+3. **Logout with `reset()`:**  
+   Calling `reset()` (`window.vision.reset()` or `import { reset } from "@vision/browser"`) clears `localStorage` and resets the tracker so subsequent browsing on a shared computer starts as a fresh anonymous visitor.
+
+> [!IMPORTANT]
+> **We strongly recommend calling `reset()` whenever a user logs out (both for the SDK and the script tag).**  
+> Because Vision persists identity in `localStorage` to avoid race conditions, failing to call `reset()` on logout means any subsequent browsing activity or logins from another user on the same device will be merged into the previous user's profile.
+
+### 1. Script Tag (`<script>`) Implementation
+
+#### Installation
+
+Add the tracker snippet to your `<head>` or root layout:
+
+```html
+<!-- Autocapture is enabled by default -->
+<script
+  defer
+  src="NEXT_PUBLIC_TRACKER_URL/script.js"
+  data-project-id="YOUR_PROJECT_ID"
+></script>
+```
+
+#### Handling Login & Logout (Generic Auth Provider / React)
+
+Call `window.vision.identify()` whenever your user session is authenticated, and call `window.vision.reset()` when the user logs out:
+
+```tsx
+import { useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth"; // Your auth hook (e.g., NextAuth, Clerk, Auth0, or custom JWT/session)
+
+export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
+  const { user, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.vision) return;
+
+    if (isAuthenticated && user) {
+      // 1. Identify user on login or session load
+      // Automatically stitches previous anonymous clicks & pageviews to this profile
+      window.vision.identify(user.id, {
+        email: user.email,
+        name: user.name,
+      });
+    } else if (!isAuthenticated) {
+      // 2. Reset identity on logout
+      // Clears local storage so subsequent sessions start as a fresh anonymous visitor
+      window.vision.reset();
+    }
+  }, [isAuthenticated, user?.id]);
+
+  return <>{children}</>;
+}
+```
+
+#### Vanilla JavaScript
+
+```javascript
+// Call on user login
+function onUserLogin(user) {
+  if (window.vision) {
+    window.vision.identify(user.id, {
+      email: user.email,
+      name: user.name,
+    });
+  }
+}
+
+// Call on user logout
+function onUserLogout() {
+  if (window.vision) {
+    window.vision.reset();
+  }
+}
+```
+
+---
+
+### 2. JavaScript / TypeScript SDK (`@vision/browser`)
+
+Install the SDK in your application:
+
+```bash
+pnpm add @vision/browser
+# or npm install @vision/browser
+```
+
+#### Initialization & Identification
+
+```typescript
+import vision, { identify, reset } from "@vision/browser";
+
+// Initialize once at the root of your application
+vision.init({
+  projectId: "YOUR_PROJECT_ID",
+  hostUrl: process.env.NEXT_PUBLIC_API_URL, // e.g. https://api.yourdomain.com
+  autoTrack: true, // default: enables pageviews, clicks, and autocapture
+});
+
+export interface UserProfile {
+  id: string;
+  email?: string;
+  name?: string;
+  [key: string]: unknown;
+}
+
+// Call whenever your application resolves an authenticated user
+export function handleUserLogin(user: UserProfile) {
+  // Automatically stitches anonymous pre-login journey to this user profile
+  identify(user.id, {
+    email: user.email,
+    name: user.name,
+  });
+}
+
+// Call when the user signs out
+export function handleUserLogout() {
+  reset(); // Clears storage and provisions a new anonymous session
+}
+```
+
+---
+
+## Scenario B: Autocapture Disabled (Manual Mode)
+
+In this scenario, automatic event capture and automatic pageviews are turned off. You gain 100% explicit control over exactly when pageviews and events are fired.
+
+### When to Use Manual Mode
+
+- **Zero Anonymous Profiles Desired:** You only want to track authenticated users and do not care about pre-login marketing traffic or anonymous user journeys.
+- **Strict Privacy / Custom Data Pipelines:** You want to vet every single event payload before it leaves the browser.
+- **Non-Standard Single-Page Frameworks:** Custom routing where automated `history.pushState` listeners cause duplicate or premature pageviews.
+
+---
+
+### 1. Script Tag (`<script>`) Manual Implementation
+
+#### Installation
+
+Disable automatic tracking with `data-auto-track="false"`:
+
+```html
+<script
+  defer
+  src="NEXT_PUBLIC_TRACKER_URL/script.js"
+  data-project-id="YOUR_PROJECT_ID"
+  data-auto-track="false"
+></script>
+```
+
+#### Manual Tracking Flow
+
+Because automatic pageviews are disabled, you must explicitly call `window.vision.identify()` and `window.vision.track()`:
+
+```tsx
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth"; // Replace with your auth state hook
+
+export function ManualAnalytics() {
+  const pathname = usePathname();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.vision) return;
+
+    if (user) {
+      // 1. Identify user first so the pageview is associated with their distinct ID
+      window.vision.identify(user.id, {
+        email: user.email,
+      });
+    }
+
+    // 2. Explicitly send pageview with identity attached
+    window.vision.track();
+  }, [pathname, user?.id]);
+
+  return null;
+}
+```
+
+#### Vanilla JavaScript
+
+```javascript
+// Call manually on navigation or route changes
+function trackPageView(currentUser) {
+  if (typeof window === "undefined" || !window.vision) return;
+
+  if (currentUser) {
+    // 1. Identify user first
+    window.vision.identify(currentUser.id, {
+      email: currentUser.email,
+    });
+  }
+
+  // 2. Explicitly send pageview
+  window.vision.track();
+}
+```
+
+---
+
+### 2. JavaScript / TypeScript SDK (`@vision/browser`) Manual Implementation
+
+Initialize with `autoTrack: false`:
+
+```typescript
+import vision, { identify, track, reset } from "@vision/browser";
+
+// Initialize without auto-tracking
+vision.init({
+  projectId: "YOUR_PROJECT_ID",
+  hostUrl: process.env.NEXT_PUBLIC_API_URL, // e.g. https://api.yourdomain.com
+  autoTrack: false, // Disables automatic pageviews, route hooks, and clicks
+});
+
+// Manual Pageview with Custom Data
+export function trackCustomPageview(
+  url: string,
+  title: string,
+  userId?: string,
+) {
+  if (userId) {
+    identify(userId);
+  }
+  track({
+    url,
+    title,
+  });
+}
+
+// Manual Event
+export function trackFeatureUsed(featureName: string) {
+  track("feature_used", { feature: featureName });
+}
+```
+
+---
+
+## Comparison Summary
+
+| Aspect                  | Autocapture Enabled (`true`)                         | Autocapture Disabled (`false`)                                |
+| :---------------------- | :--------------------------------------------------- | :------------------------------------------------------------ |
+| **Setup Complexity**    | Zero code; drop in script/init                       | Requires router hooks and manual `track()` calls              |
+| **Marketing Funnels**   | Full visibility into anonymous $\to$ converted       | Pre-login funnel data is lost unless manually coded           |
+| **Identity Management** | Handled automatically via `localStorage` & stitching | Controlled manually by ordering `identify()` before `track()` |
+| **Clicks & Inputs**     | Captured automatically                               | Captured only via `data-vision-event` or manual code           |
+| **Logout Handling**     | Requires `vision.reset()` on logout                   | Requires `vision.reset()` on logout                            |

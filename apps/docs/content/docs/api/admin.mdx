@@ -1,0 +1,133 @@
+---
+title: Admin
+---
+
+Administrative endpoints for managing users, projects, and organizations system-wide.
+
+> [!NOTE]
+> These endpoints are restricted to authenticated users with the **admin** role. Requests from non-admin users return `401 Unauthorized`.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/admin/users
+GET NEXT_PUBLIC_API_URL/admin/projects
+GET NEXT_PUBLIC_API_URL/admin/organizations
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/admin/users
+
+Returns all registered users in the platform.
+
+**Parameters**
+
+| Parameter  | Type   | Description                                                     |
+| ---------- | ------ | --------------------------------------------------------------- |
+| `search`   | string | (optional) Search text matching email or display name.          |
+| `page`     | number | (optional, default 1) Page number.                              |
+| `pageSize` | number | (optional, default 20) Number of results per page.              |
+| `orderBy`  | string | (optional) Column name to sort by (e.g. `createdAt`, `email`). |
+| `sort`     | string | (optional) Sort direction (`asc` \| `desc`).                    |
+
+**Sample response**
+
+```json
+{
+  "data": [
+    {
+      "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "clerkId": "user_2xxxxxx",
+      "email": "user@example.com",
+      "role": "user",
+      "displayName": "Jane Doe",
+      "logoUrl": null,
+      "createdAt": "2026-01-10T12:00:00.000Z",
+      "updatedAt": "2026-01-10T12:00:00.000Z",
+      "deletedAt": null
+    }
+  ],
+  "count": 1,
+  "page": 1,
+  "pageSize": 20
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/admin/projects
+
+Returns all projects across all organizations and users.
+
+**Parameters**
+
+| Parameter  | Type   | Description                                                    |
+| ---------- | ------ | -------------------------------------------------------------- |
+| `search`   | string | (optional) Search query filtering name or domain.              |
+| `page`     | number | (optional, default 1) Page number.                             |
+| `pageSize` | number | (optional, default 20) Number of results per page.             |
+| `orderBy`  | string | (optional) Column name to sort by (e.g. `createdAt`, `name`).  |
+| `sort`     | string | (optional) Sort direction (`asc` \| `desc`).                   |
+
+**Sample response**
+
+```json
+{
+  "data": [
+    {
+      "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "name": "My App",
+      "domain": "myapp.com",
+      "shareId": null,
+      "userId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "organizationId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "autocaptureEnabled": true,
+      "createdAt": "2026-01-12T08:30:00.000Z",
+      "updatedAt": "2026-01-12T08:30:00.000Z",
+      "deletedAt": null
+    }
+  ],
+  "count": 1,
+  "page": 1,
+  "pageSize": 20
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/admin/organizations
+
+Returns all organizations in the platform.
+
+**Parameters**
+
+| Parameter  | Type   | Description                                                    |
+| ---------- | ------ | -------------------------------------------------------------- |
+| `search`   | string | (optional) Search query filtering organization name or slug.   |
+| `page`     | number | (optional, default 1) Page number.                             |
+| `pageSize` | number | (optional, default 20) Number of results per page.             |
+| `orderBy`  | string | (optional) Column name to sort by (e.g. `createdAt`, `name`).  |
+| `sort`     | string | (optional) Sort direction (`asc` \| `desc`).                   |
+
+**Sample response**
+
+```json
+{
+  "data": [
+    {
+      "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "name": "Acme Corp",
+      "slug": "acme-corp",
+      "accessCode": "xxxxxxxx",
+      "logoUrl": null,
+      "createdAt": "2026-01-05T14:20:00.000Z",
+      "updatedAt": "2026-01-05T14:20:00.000Z",
+      "deletedAt": null
+    }
+  ],
+  "count": 1,
+  "page": 1,
+  "pageSize": 20
+}
+```

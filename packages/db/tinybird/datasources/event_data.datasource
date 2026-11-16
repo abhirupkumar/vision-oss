@@ -1,0 +1,19 @@
+SCHEMA >
+    `project_id`      String              `json:$.project_id`,
+    `session_id`      String  DEFAULT ''  `json:$.session_id`,
+    `event_id`        String              `json:$.event_id`,
+    `url_path`        String  DEFAULT ''  `json:$.url_path`,
+    `event_name`      String  DEFAULT ''  `json:$.event_name`,
+    `data_key`        String              `json:$.data_key`,
+    `data_type`       UInt8   DEFAULT 0   `json:$.data_type`,
+    `string_value`    String  DEFAULT ''  `json:$.string_value`,
+    `number_value`    Nullable(Float64)   `json:$.number_value`,
+    `date_value`      Nullable(DateTime64(3, 'UTC')) `json:$.date_value`,
+    `created_at`      DateTime64(3, 'UTC') `json:$.created_at`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(created_at)"
+ENGINE_SORTING_KEY "project_id, event_id, data_key"
+ENGINE_TTL "toDateTime(created_at) + toIntervalYear(2)"
+
+

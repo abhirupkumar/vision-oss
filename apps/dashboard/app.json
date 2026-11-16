@@ -1,0 +1,15 @@
+{
+  "name": "Vision",
+  "description": "Vision is a revenue first product analytics.",
+  "keywords": ["analytics", "charts", "statistics", "web-analytics"],
+  "project": "https://umami.is",
+  "repository": "https://github.com/abhirupkumar/vision-analytics",
+  "env": {
+    "APP_SECRET": {
+      "description": "Used to generate unique values for your installation",
+      "required": true,
+      "generator": "secret"
+    }
+  },
+  "success_url": "/"
+}

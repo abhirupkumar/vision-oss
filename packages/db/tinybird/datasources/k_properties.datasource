@@ -1,0 +1,25 @@
+SCHEMA >
+    `stream_type`   String                               `json:$.stream_type`,
+    -- Shared fields
+    `project_id`    String                               `json:$.project_id`,
+    `session_id`    String              DEFAULT ''       `json:$.session_id`,
+    `created_at`    DateTime64(3, 'UTC')                 `json:$.created_at`,
+    -- event_data fields
+    `event_id`      String              DEFAULT ''       `json:$.event_id`,
+    `url_path`      String              DEFAULT ''       `json:$.url_path`,
+    `event_name`    String              DEFAULT ''       `json:$.event_name`,
+    `data_key`      String              DEFAULT ''       `json:$.data_key`,
+    `data_type`     UInt8               DEFAULT 0        `json:$.data_type`,
+    `string_value`  String              DEFAULT ''       `json:$.string_value`,
+    `number_value`  Nullable(Float64)                    `json:$.number_value`,
+    `date_value`    Nullable(DateTime64(3, 'UTC'))        `json:$.date_value`,
+    -- visitor_data fields
+    `visitor_id`    String              DEFAULT ''       `json:$.visitor_id`,
+    `distinct_id`   String              DEFAULT ''       `json:$.distinct_id`
+
+ENGINE "Null"
+
+KAFKA_CONNECTION_NAME "aiven_kafka"
+KAFKA_TOPIC "properties"
+KAFKA_GROUP_ID "tinybird_k_properties"
+KAFKA_AUTO_OFFSET_RESET "latest"

@@ -1,0 +1,137 @@
+---
+title: LLM Observability
+---
+
+Endpoints for monitoring AI prompts, token usage, model latency, error rates, and API costs across providers.
+
+**Proxy & AI Endpoints**
+
+```text
+ALL NEXT_PUBLIC_API_URL/llm-proxy/:provider/*
+POST NEXT_PUBLIC_API_URL/ai/chat/stream
+```
+
+**Analytics & Telemetry Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/metrics
+GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/series
+GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/traces
+GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/cost-forecast
+GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/model-breakdown
+GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/country-breakdown
+GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/user-breakdown
+GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/template-stats
+GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/scores
+```
+
+---
+
+## ALL NEXT_PUBLIC_API_URL/llm-proxy/:provider/*
+
+Transparent, zero-added-latency HTTP proxy between client applications and LLM providers. Telemetry is streamed without blocking response chunks, and costs/tokens are recorded asynchronously.
+
+**Supported Providers**
+- `openai`: Routes to `https://api.openai.com`
+- `anthropic`: Routes to `https://api.anthropic.com`
+- `openrouter`: Routes to `https://openrouter.ai/api`
+- `groq`: Routes to `https://api.groq.com/openai`
+- `google`: Routes to `https://generativelanguage.googleapis.com`
+- Custom: Pass header `X-Vision-Custom-Base-Url`
+
+**Headers**
+
+| Header | Description | Required |
+| :--- | :--- | :--- |
+| `X-Vision-Project` | Your Vision project ID or API key. | **Yes** |
+| `X-Vision-Api-Key` | Provider API key (or pass via standard `Authorization: Bearer <key>`). | Optional |
+| `X-Vision-User-Id` | Authenticated customer user ID to attribute token costs and margins. | Recommended |
+| `X-Vision-Session-Id` | Session UUID for journey linking. | Optional |
+| `X-Vision-Trace-Id` | Custom trace UUID. | Optional |
+| `X-Vision-Span-Name` | Name of prompt operation (e.g. `summarize-doc`). | Optional |
+| `X-Vision-Tags` | Comma-separated or JSON array of tags. | Optional |
+
+**Example (OpenAI via fetch)**
+
+```typescript
+const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/llm-proxy/openai/v1/chat/completions`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+    'X-Vision-Project': 'your-project-id',
+    'X-Vision-User-Id': user.id,
+  },
+  body: JSON.stringify({
+    model: 'gpt-4o',
+    messages: [{ role: 'user', content: 'Generate quarterly report' }],
+  }),
+});
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/ai/chat/stream
+
+Stream AI chat responses with integrated business analytics and scorecard tool calling.
+
+**Request body**
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `projectId` | string | **Required**. Target project ID. |
+| `messages` | array | **Required**. Conversation messages history. |
+| `provider` | string | **Required**. Provider: `google`, `openai`, `anthropic`, or `openrouter`. |
+| `apiKey` | string | **Required**. Provider API key. |
+| `model` | string | (optional) Model name override. |
+| `insightContext` | object | (optional) Additional business context. |
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/metrics
+
+Returns high-level aggregate LLM metrics, including total token counts (input/output), total cost, average latency, and average time-to-first-token (TTFT).
+
+**Sample response**
+
+```json
+{
+  "totalTokens": 2450000,
+  "promptTokens": 1800000,
+  "completionTokens": 650000,
+  "totalCost": 12.45,
+  "avgLatency": 420,
+  "avgTtft": 180,
+  "requestCount": 5400
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/series
+
+Returns token consumption, latency, and cost over time.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/traces
+
+Returns paginated telemetry traces for individual model invocations, including prompt/completion details, parameters, and token usage.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/model-breakdown
+
+Returns usage, latency, and cost comparisons grouped by model (e.g. `gpt-4o`, `claude-3-5-sonnet`, `gemini-1.5-pro`).
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/cost-forecast
+
+Provides projected monthly costs based on recent usage trajectory.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/llm/user-breakdown
+
+Returns token usage and request counts grouped by application end users.

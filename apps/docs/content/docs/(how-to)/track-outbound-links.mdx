@@ -1,0 +1,41 @@
+---
+title: Track outbound links
+---
+
+When a user clicks on a link to an external site, this event is normally not captured because
+the user is leaving the site where Vision runs. However, using [events](/docs/track-events) you can
+track this behavior.
+
+To track outbound links, you need to add data attributes to the anchor tag containing the external link.
+When the tag is clicked, the event will be triggered. In this example, we are sending
+an event named `outbound-link-click` with the value of `url` set to the external URL.
+
+```html
+<a
+  href="https://www.external-website.com"
+  data-vision-event="outbound-link-click"
+  data-vision-event-url="https://www.external-website.com"
+>
+  External link
+</a>
+```
+
+If you don't want to manually update all your anchor tags, you can use this script to automatically add the
+event attributes to all your outbound tags. You can place the following script at the bottom of your HTML body.
+
+```html
+<script type="text/javascript">
+  (() => {
+    const name = "outbound-link-click";
+    document.querySelectorAll("a").forEach((a) => {
+      if (
+        a.host !== window.location.host &&
+        !a.getAttribute("data-vision-event")
+      ) {
+        a.setAttribute("data-vision-event", name);
+        a.setAttribute("data-vision-event-url", a.href);
+      }
+    });
+  })();
+</script>
+```

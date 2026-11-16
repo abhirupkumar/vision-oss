@@ -1,0 +1,179 @@
+---
+title: Projects
+---
+
+Operations for managing analytics projects.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/projects
+POST NEXT_PUBLIC_API_URL/projects
+GET NEXT_PUBLIC_API_URL/projects/:projectId
+POST NEXT_PUBLIC_API_URL/projects/:projectId
+DELETE NEXT_PUBLIC_API_URL/projects/:projectId
+POST NEXT_PUBLIC_API_URL/projects/:projectId/transfer
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects
+
+Returns a paginated list of projects belonging to the authenticated user.
+
+**Parameters**
+
+| Parameter              | Type    | Description                                                                     |
+| ---------------------- | ------- | ------------------------------------------------------------------------------- |
+| `includeOrganizations` | boolean | (optional) Set to `true` to include projects from organizations you belong to.  |
+| `search`               | string  | (optional) Search text to filter projects by name or domain.                    |
+| `page`                 | number  | (optional, default 1) Current page.                                             |
+| `pageSize`             | number  | (optional, default 10) Number of projects per page.                             |
+
+**Sample response**
+
+```json
+{
+  "data": [
+    {
+      "id": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+      "name": "Production App",
+      "domain": "myapp.com",
+      "shareId": null,
+      "userId": "c7a6e11b-3b4e-4f3b-8219-482a5c2d1b82",
+      "organizationId": null,
+      "autocaptureEnabled": true,
+      "createdAt": "2026-01-20T10:00:00.000Z",
+      "updatedAt": "2026-01-20T10:00:00.000Z",
+      "deletedAt": null
+    }
+  ],
+  "count": 1,
+  "page": 1,
+  "pageSize": 10
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/projects
+
+Creates a new analytics project.
+
+**Request body**
+
+| Property             | Type    | Description                                                   |
+| -------------------- | ------- | ------------------------------------------------------------- |
+| `name`               | string  | **Required**. Project display name (max 100 chars).           |
+| `domain`             | string  | **Required**. Tracking domain (e.g. `myapp.com`).             |
+| `shareId`            | string  | (optional) Custom unique alphanumeric share ID (8-50 chars).  |
+| `organizationId`     | string  | (optional) UUID of organization to assign the project to.     |
+| `autocaptureEnabled` | boolean | (optional, default `true`) Whether autocapture is enabled.    |
+
+```json
+{
+  "name": "My Landing Page",
+  "domain": "landing.example.com",
+  "autocaptureEnabled": true
+}
+```
+
+**Sample response**
+
+```json
+{
+  "id": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+  "name": "My Landing Page",
+  "domain": "landing.example.com",
+  "shareId": null,
+  "userId": "c7a6e11b-3b4e-4f3b-8219-482a5c2d1b82",
+  "organizationId": null,
+  "autocaptureEnabled": true,
+  "createdAt": "2026-02-01T15:20:00.000Z",
+  "updatedAt": "2026-02-01T15:20:00.000Z"
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId
+
+Fetches the configuration and metadata for a specific project.
+
+**Sample response**
+
+```json
+{
+  "id": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+  "name": "My Landing Page",
+  "domain": "landing.example.com",
+  "shareId": null,
+  "userId": "c7a6e11b-3b4e-4f3b-8219-482a5c2d1b82",
+  "organizationId": null,
+  "autocaptureEnabled": true,
+  "createdAt": "2026-02-01T15:20:00.000Z",
+  "updatedAt": "2026-02-01T15:20:00.000Z"
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/projects/:projectId
+
+Updates an existing project's settings. You can also use the `PATCH` HTTP method.
+
+**Request body**
+
+| Property             | Type    | Description                                             |
+| -------------------- | ------- | ------------------------------------------------------- |
+| `name`               | string  | (optional) New project name.                            |
+| `domain`             | string  | (optional) New project domain.                          |
+| `shareId`            | string  | (optional) Custom unique share ID, or `null` to remove. |
+| `autocaptureEnabled` | boolean | (optional) Toggle autocapture.                          |
+
+```json
+{
+  "name": "Updated Project Name",
+  "shareId": "public-view-123"
+}
+```
+
+---
+
+## DELETE NEXT_PUBLIC_API_URL/projects/:projectId
+
+Permanently deletes the specified project. Requires project owner permissions.
+
+**Sample response**
+
+```json
+{
+  "ok": true
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/projects/:projectId/transfer
+
+Transfers ownership of a project to another user by email address.
+
+**Request body**
+
+| Property | Type   | Description                                       |
+| -------- | ------ | ------------------------------------------------- |
+| `email`  | string | **Required**. Valid email address of target user. |
+
+```json
+{
+  "email": "colleague@example.com"
+}
+```
+
+**Sample response**
+
+```json
+{
+  "ok": true
+}
+```

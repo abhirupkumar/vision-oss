@@ -1,0 +1,130 @@
+---
+title: Segments & Cohorts
+---
+
+Operations for creating, listing, and managing audience segments and user cohorts.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/projects/:projectId/segments
+POST NEXT_PUBLIC_API_URL/projects/:projectId/segments
+GET NEXT_PUBLIC_API_URL/projects/:projectId/segments/:segmentId
+POST NEXT_PUBLIC_API_URL/projects/:projectId/segments/:segmentId
+DELETE NEXT_PUBLIC_API_URL/projects/:projectId/segments/:segmentId
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/segments
+
+Returns all custom segments or cohorts configured for a project.
+
+**Parameters**
+
+| Parameter | Type   | Description                                                                 |
+| --------- | ------ | --------------------------------------------------------------------------- |
+| `type`    | string | (optional, default `segment`) Filter type: `segment` or `cohort`.           |
+| `startAt` | number | (optional) Start timestamp filter in milliseconds.                          |
+| `endAt`   | number | (optional) End timestamp filter in milliseconds.                            |
+
+**Sample response**
+
+```json
+[
+  {
+    "id": "seg_01h7x8...",
+    "projectId": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+    "name": "Power Users (Desktop)",
+    "type": "segment",
+    "parameters": {
+      "device": "desktop",
+      "country": "US"
+    },
+    "createdAt": "2026-02-10T12:00:00.000Z",
+    "updatedAt": "2026-02-10T12:00:00.000Z"
+  }
+]
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/projects/:projectId/segments
+
+Creates a new audience segment or cohort.
+
+**Request body**
+
+| Property     | Type   | Description                                                     |
+| ------------ | ------ | --------------------------------------------------------------- |
+| `name`       | string | **Required**. Segment display name (max 100 characters).        |
+| `type`       | string | **Required**. `segment` or `cohort` (max 50 characters).        |
+| `parameters` | object | (optional) Filter rules and dimension criteria for the segment. |
+
+```json
+{
+  "name": "EU Mobile Visitors",
+  "type": "segment",
+  "parameters": {
+    "device": "mobile",
+    "country": "DE"
+  }
+}
+```
+
+**Sample response**
+
+```json
+{
+  "id": "seg_01h7x8...",
+  "projectId": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+  "name": "EU Mobile Visitors",
+  "type": "segment",
+  "parameters": {
+    "device": "mobile",
+    "country": "DE"
+  },
+  "createdAt": "2026-02-10T12:00:00.000Z",
+  "updatedAt": "2026-02-10T12:00:00.000Z"
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/segments/:segmentId
+
+Fetches details and filter configuration for a specific segment.
+
+---
+
+## POST NEXT_PUBLIC_API_URL/projects/:projectId/segments/:segmentId
+
+Updates a segment's name, type, or rule parameters.
+
+**Request body**
+
+| Property     | Type   | Description                                              |
+| ------------ | ------ | -------------------------------------------------------- |
+| `name`       | string | (optional) Updated segment name.                         |
+| `type`       | string | (optional) Updated type (`segment` or `cohort`).         |
+| `parameters` | object | (optional) Updated rule parameters.                      |
+
+```json
+{
+  "name": "EU Mobile Visitors (Updated)"
+}
+```
+
+---
+
+## DELETE NEXT_PUBLIC_API_URL/projects/:projectId/segments/:segmentId
+
+Permanently deletes the specified segment or cohort.
+
+**Sample response**
+
+```json
+{
+  "ok": true
+}
+```

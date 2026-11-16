@@ -1,0 +1,87 @@
+---
+title: Me
+---
+
+Endpoints for accessing and updating the authenticated user's profile, accessible projects, and organizations.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/me
+PATCH NEXT_PUBLIC_API_URL/me
+POST NEXT_PUBLIC_API_URL/me/password
+GET NEXT_PUBLIC_API_URL/me/projects
+GET NEXT_PUBLIC_API_URL/me/organizations
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/me
+
+Returns profile details for the currently authenticated user.
+
+**Sample response**
+
+```json
+{
+  "id": "c7a6e11b-3b4e-4f3b-8219-482a5c2d1b82",
+  "clerkId": "user_2test123",
+  "email": "user@example.com",
+  "role": "user",
+  "displayName": "Alex Doe",
+  "logoUrl": "https://img.clerk.com/...",
+  "createdAt": "2026-01-10T12:00:00.000Z",
+  "updatedAt": "2026-01-10T12:00:00.000Z"
+}
+```
+
+---
+
+## PATCH NEXT_PUBLIC_API_URL/me
+
+Updates the user's display name or avatar logo URL.
+
+**Request body**
+
+```json
+{
+  "displayName": "Alex Smith",
+  "logoUrl": "https://example.com/avatar.png"
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/me/password
+
+Updates the user's password.
+
+**Request body**
+
+```json
+{
+  "currentPassword": "old-password",
+  "newPassword": "new-secure-password"
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/me/projects
+
+Returns all projects owned by or accessible to the current user.
+
+**Parameters**
+
+| Parameter              | Type    | Description                                             |
+| ---------------------- | ------- | ------------------------------------------------------- |
+| `includeOrganizations` | boolean | Set to `true` to include organization projects.         |
+| `search`               | string  | (optional) Filter projects by name or domain.           |
+| `page`                 | number  | (optional, default 1) Page number.                      |
+| `pageSize`             | number  | (optional, default 10) Number of results per page.      |
+
+---
+
+## GET NEXT_PUBLIC_API_URL/me/organizations
+
+Returns all organizations the current user is a member of.

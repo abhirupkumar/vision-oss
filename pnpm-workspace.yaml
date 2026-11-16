@@ -1,0 +1,9 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'sdk/js/*'
+  - 'sdk/python/*'
+ignoredBuiltDependencies:
+  - esbuild
+  - sharp
+  - cypress

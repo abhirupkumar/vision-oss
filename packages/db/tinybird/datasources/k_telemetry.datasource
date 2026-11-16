@@ -1,0 +1,31 @@
+SCHEMA >
+    `stream_type`  String                               `json:$.stream_type`,
+    `project_id`   String                               `json:$.project_id`,
+    `visitor_id`   String          DEFAULT ''           `json:$.visitor_id`,
+    `session_id`   String          DEFAULT ''           `json:$.session_id`,
+    `error_id`     String          DEFAULT ''           `json:$.error_id`,
+    `error_type`   LowCardinality(String) DEFAULT ''    `json:$.error_type`,
+    `message`      String          DEFAULT ''           `json:$.message`,
+    `filename`     String          DEFAULT ''           `json:$.filename`,
+    `lineno`       Nullable(Int32)                      `json:$.lineno`,
+    `colno`        Nullable(Int32)                      `json:$.colno`,
+    `stack`        String          DEFAULT ''           `json:$.stack`,
+    `fingerprint`  String          DEFAULT ''           `json:$.fingerprint`,
+    `url_path`     String          DEFAULT ''           `json:$.url_path`,
+    `url_query`    String          DEFAULT ''           `json:$.url_query`,
+    `hostname`     LowCardinality(String) DEFAULT ''    `json:$.hostname`,
+    `browser`      LowCardinality(String) DEFAULT ''    `json:$.browser`,
+    `os`           LowCardinality(String) DEFAULT ''    `json:$.os`,
+    `device`       LowCardinality(String) DEFAULT ''    `json:$.device`,
+    `country`      LowCardinality(String) DEFAULT ''    `json:$.country`,
+    `region`       LowCardinality(String) DEFAULT ''    `json:$.region`,
+    `city`         String          DEFAULT ''           `json:$.city`,
+    `level`        LowCardinality(String) DEFAULT 'error' `json:$.level`,
+    `created_at`   DateTime64(3, 'UTC')                 `json:$.created_at`
+
+ENGINE "Null"
+
+KAFKA_CONNECTION_NAME "aiven_kafka"
+KAFKA_TOPIC "telemetry"
+KAFKA_GROUP_ID "tinybird_k_telemetry"
+KAFKA_AUTO_OFFSET_RESET "latest"

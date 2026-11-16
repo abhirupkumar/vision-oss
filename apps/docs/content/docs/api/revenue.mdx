@@ -1,0 +1,117 @@
+---
+title: Revenue & Unit Economics API
+---
+
+Query financial metrics, customer-level gross margins, and unit economics telemetry reconciled with AI compute costs.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/projects/:projectId/revenue
+GET NEXT_PUBLIC_API_URL/projects/:projectId/revenue/metrics
+GET NEXT_PUBLIC_API_URL/projects/:projectId/revenue/sessions
+GET NEXT_PUBLIC_API_URL/projects/:projectId/revenue/stats
+GET NEXT_PUBLIC_API_URL/projects/:projectId/revenue/users
+GET NEXT_PUBLIC_API_URL/projects/:projectId/revenue/unit-economics
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/revenue
+
+Returns time series revenue charts bucketed by day, week, or month.
+
+**Sample response**
+
+```json
+{
+  "chart": [
+    { "t": "2026-02-01", "y": 450.00 },
+    { "t": "2026-02-02", "y": 890.50 }
+  ],
+  "total": 1340.50,
+  "currency": "USD"
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/revenue/metrics
+
+Breaks down revenue by dimensions such as referrer domain, campaign UTM parameter, country, or device.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/revenue/sessions
+
+Returns visitor sessions that generated revenue events, including cart value and transaction identifiers.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/revenue/stats
+
+Returns high-level monetary summaries including total revenue sum, transaction count, and average order value (AOV).
+
+**Sample response**
+
+```json
+{
+  "sum": 15420.00,
+  "count": 210,
+  "avg": 73.43
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/revenue/users
+
+Returns customer-level financial audits, joining paid subscription revenues with model compute costs to compute net gross margins.
+
+**Query Parameters**
+
+- `limit` *(optional, number)*: Maximum number of records to return (default: `50`).
+
+**Sample response**
+
+```json
+[
+  {
+    "userId": "usr_9942a1",
+    "plan": "Scale",
+    "revenue": 299.00,
+    "llmTokens": 14200000,
+    "llmCost": 56.40,
+    "grossMargin": 242.60,
+    "marginPct": 81.1,
+    "costToServe": 0.0470,
+    "lastActive": "2026-09-29T18:40:12.000Z"
+  }
+]
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/revenue/unit-economics
+
+Returns executive scorecard unit economics, including blended gross margin, average Cost-to-Serve (CTS), AI ROI ratio, and margin health distribution.
+
+**Sample response**
+
+```json
+{
+  "totalRevenue": 184500.00,
+  "totalLlmCost": 22140.00,
+  "grossMargin": 162360.00,
+  "grossMarginPct": 88.0,
+  "avgCostToServePerActiveUser": 3.75,
+  "aiRoiRatio": 8.33,
+  "unprofitableUserCount": 9,
+  "marginDistribution": [
+    { "range": "<0% (Unprofitable)", "count": 9 },
+    { "range": "0-50%", "count": 32 },
+    { "range": "50-80%", "count": 184 },
+    { "range": ">80% (Healthy)", "count": 1055 }
+  ]
+}
+```

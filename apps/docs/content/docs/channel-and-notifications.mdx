@@ -1,0 +1,67 @@
+---
+title: Channel & Push Notifications
+description: Learn how to monitor events in real-time and subscribe to push notifications for critical activities.
+---
+
+Vision Analytics provides a dedicated **Channel** feed where you can monitor all your incoming events, user identifications, and payments in real-time. You can also opt-in to receive instant **Push Notifications** straight to your desktop or mobile device.
+
+## The Channel Feed
+
+The Channel page is a live timeline that instantly updates whenever a new event or payment occurs. 
+
+To access it, navigate to **Channel** on the left sidebar of your dashboard. You will see:
+- Real-time stream of incoming custom events.
+- New user and visitor identifications.
+- Completed payments and revenue tracking.
+
+You can filter the feed by specific event types or sources to focus on what matters most.
+
+## Enabling Push Notifications
+
+If you want to be alerted immediately without keeping the dashboard open, you can enable Web Push Notifications.
+
+1. Navigate to the **Channel** page.
+2. Click the **Enable Notifications** button at the top right of the feed.
+3. Your browser will prompt you to grant notification permissions. Click **Allow**.
+
+Once enabled, any event flagged for notification will trigger a native push notification to your device.
+
+## Triggering Notifications
+
+Notifications are completely opt-in per event. By default, events are just logged for analytics. To trigger a push notification for a specific event, you need to set the `notify` flag.
+
+### Using the HTML Tracker
+
+If you are using data attributes, simply add `data-vision-notify="true"` to your tracked element:
+
+```html
+<button 
+  data-vision-event="Sign Up Clicked"
+  data-vision-notify="true"
+>
+  Sign Up
+</button>
+```
+
+### Using the JS Tracker
+
+If you are calling the tracker programmatically, include `notify: true` in your event data payload:
+
+```javascript
+vision.track("Subscription Created", {
+  plan: "Pro",
+  revenue: 29.99,
+  currency: "USD",
+  notify: true // This triggers the push notification
+});
+```
+
+### Payment Connections
+
+For payment provider integrations (like Stripe or LemonSqueezy), you can configure notifications globally per project connection. 
+
+1. Go to **Settings > Payment Providers**.
+2. Select your connected provider.
+3. Toggle the **Receive push notifications for payments** option.
+
+When this is enabled, any payment webhook received will automatically trigger a push notification, ensuring you never miss a new sale!

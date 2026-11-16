@@ -1,0 +1,19 @@
+SCHEMA >
+    `stream_type`            String                         `json:$.stream_type`,
+    `project_id`             String                         `json:$.project_id`,
+    `distinct_id`            String          DEFAULT ''     `json:$.distinct_id`,
+    `session_id`             String          DEFAULT ''     `json:$.session_id`,
+    `event_id`               String          DEFAULT ''     `json:$.event_id`,
+    `event_name`             String          DEFAULT ''     `json:$.event_name`,
+    `currency`               LowCardinality(String) DEFAULT '' `json:$.currency`,
+    `revenue`                Decimal(18, 4)                 `json:$.revenue`,
+    `provider`               LowCardinality(String) DEFAULT '' `json:$.provider`,
+    `payment_connection_id`  String          DEFAULT ''     `json:$.payment_connection_id`,
+    `created_at`             DateTime64(3, 'UTC')           `json:$.created_at`
+
+ENGINE "Null"
+
+KAFKA_CONNECTION_NAME "aiven_kafka"
+KAFKA_TOPIC "business"
+KAFKA_GROUP_ID "tinybird_k_business"
+KAFKA_AUTO_OFFSET_RESET "latest"

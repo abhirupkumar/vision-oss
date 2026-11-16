@@ -1,0 +1,47 @@
+---
+title: Realtime
+---
+
+Retrieve live analytics for active visitors on your website over the last 30 minutes.
+
+**Endpoint**
+
+```text
+GET NEXT_PUBLIC_API_URL/realtime/:projectId
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/realtime/:projectId
+
+Returns active visitors, current pages being viewed, countries, and live event activity.
+
+**Sample response**
+
+```json
+{
+  "pageviews": [
+    { "x": "2026-02-20 18:25:00", "y": 12 },
+    { "x": "2026-02-20 18:26:00", "y": 18 }
+  ],
+  "visitors": [
+    { "x": "2026-02-20 18:25:00", "y": 8 },
+    { "x": "2026-02-20 18:26:00", "y": 11 }
+  ],
+  "events": [
+    {
+      "id": "e1",
+      "eventName": "purchase",
+      "createdAt": "2026-02-20T18:26:10.000Z"
+    }
+  ],
+  "countries": [
+    { "x": "US", "y": 7 },
+    { "x": "GB", "y": 3 }
+  ],
+  "pages": [
+    { "x": "/docs", "y": 9 },
+    { "x": "/pricing", "y": 4 }
+  ]
+}
+```

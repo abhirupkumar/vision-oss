@@ -1,0 +1,68 @@
+---
+title: Bypass ad blockers
+---
+
+Even though Vision is a privacy-focused product, it may still get blocked by
+certain ad blockers. Ad blockers use blocklists maintained by many different people.
+Some lists can be overly aggressive, for example blocking anything with even
+the word `analytics` in it or simply blocking all tracking products regardless
+of how they operate.
+
+Here are few methods you can use to avoid ad blockers.
+
+## Proxying
+
+Proxying is done at the server level so you will need access to your web server to make changes.
+With this method, you can proxy the tracking script itself to hide the actual name and location of
+the original script.
+
+For example, you can have a script on your website that is:
+
+`https://your-website.com/stats.js`
+
+That is proxying the file at:
+
+`NEXT_PUBLIC_TRACKER_URL/script.js`
+
+So even if an aggressive ad blocker targets analytics hostnames, your own first-party domain serves the tracker.
+
+Here are some tutorials you can use:
+
+- [Nginx](https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/)
+- [Apache](https://httpd.apache.org/docs/2.4/howto/reverse_proxy.html)
+
+To implement this using server-side proxying in [Express.js](https://expressjs.com):
+
+```js
+app.get("/stats.js", async (req, res) => {
+  const scriptText = await fetch(`${process.env.NEXT_PUBLIC_TRACKER_URL}/script.js`);
+  res.setHeader("Content-Type", "application/javascript");
+  res.send(await scriptText.text());
+});
+```
+
+Then in your HTML `<head>` tag:
+
+```html
+<script defer src="/stats.js" data-project-id="your-project-id"></script>
+```
+
+If you are using a framework like [Next.js](https://nextjs.org), you can use their [rewrites](https://nextjs.org/docs/pages/api-reference/next-config-js/rewrites) feature:
+
+```js
+// next.config.js
+module.exports = {
+  async rewrites() {
+    return [
+      {
+        source: "/stats.js",
+        destination: `${process.env.NEXT_PUBLIC_TRACKER_URL}/script.js`,
+      },
+      {
+        source: "/api/send",
+        destination: `${process.env.NEXT_PUBLIC_API_URL}/send`,
+      },
+    ];
+  },
+};
+```

@@ -1,0 +1,303 @@
+---
+title: Payment
+description: Learn how to track payments, subscriptions, and revenue in Vision Analytics using automated payment webhooks, or with client-side checkout event tracking as a fallback.
+---
+
+Vision allows you to track revenue, customer spending, and subscription lifecycle events automatically from your payment providers or manually via client-side tracking.
+
+---
+
+## Automated Payment Provider Tracking
+
+Vision can automatically track payments and subscription lifecycle events from your payment provider via **webhooks** — no manual tracking code required on checkout completion. When a customer completes checkout, Vision receives the event from the provider, attributes it to the original visitor, and records it to your project's revenue metrics.
+
+### Supported Providers
+
+- **Stripe**
+- **Paddle**
+- **Polar**
+- **LemonSqueezy**
+
+---
+
+### How Attribution Works
+
+When a customer begins checkout, pass **attribution metadata** to the checkout session. Vision reads this metadata back from the incoming webhook to match the payment to the correct visitor session.
+
+| Metadata Key  | Description                                                 | Required     |
+| ------------- | ----------------------------------------------------------- | ------------ |
+| `projectId`   | Your Vision project ID                                       | ✅ Yes       |
+| `visitorId`   | The Vision visitor ID (from `window.vision?.visitorId`)       | Recommended  |
+| `deviceId`    | A fallback device ID if visitor ID is unavailable           | Optional     |
+
+#### Understanding `visitorId` vs `deviceId`
+- **`window.vision?.visitorId`**: Derived automatically by the Vision backend using a privacy-preserving cryptographic hash (or an identified user ID) and populated onto `window.vision` after the first pageview or event. It is a `string` (or `null` before the first event completes).
+- **`window.vision?.deviceId`**: Initialized to `null` on the tracker (or a string if configured via `data-device-id`). It serves as an optional fallback identifier for external environments (such as native mobile apps, desktop apps, or custom client environments) where `visitorId` is not present. It is always `string | null` and never `undefined`.
+
+#### Reading Identifiers on the Client
+Before initiating checkout, read the identifiers from `window.vision` and forward them to your backend:
+
+```js
+// Client-side: Read identifiers from the Vision tracker
+const visionVisitorId = window.vision?.visitorId; // string | null
+const visionDeviceId = window.vision?.deviceId;   // string | null
+
+// Forward to your backend endpoint that creates the checkout session
+const response = await fetch('/api/create-checkout', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    visitorId: visionVisitorId,
+    deviceId: visionDeviceId,
+  }),
+});
+```
+
+---
+
+### 1. Stripe
+
+#### Passing Metadata at Checkout
+Pass the attribution keys in the `metadata` field of your **Checkout Session** or **Payment Intent**:
+
+```js
+// Node.js server-side example
+const session = await stripe.checkout.sessions.create({
+  line_items: [{ price: 'price_xxx', quantity: 1 }],
+  mode: 'payment',
+  success_url: 'https://yourapp.com/success',
+  cancel_url: 'https://yourapp.com/cancel',
+  metadata: {
+    projectId: 'your-vision-project-id',   // required
+    visitorId: visionVisitorId,             // from window.vision?.visitorId
+    deviceId: visionDeviceId,               // optional fallback (string or null)
+  },
+});
+```
+
+#### Tracked Stripe Events
+
+| Stripe Event                      | Vision Event Type        |
+| --------------------------------- | ----------------------- |
+| `payment_intent.succeeded`        | `payment.succeeded`     |
+| `payment_intent.payment_failed`   | `payment.failed`        |
+| `checkout.session.completed`      | `payment.succeeded`     |
+| `charge.refunded`                 | `payment.refunded`      |
+| `customer.subscription.created`   | `subscription.created`  |
+| `customer.subscription.updated`   | `subscription.updated`  |
+| `customer.subscription.deleted`   | `subscription.cancelled`|
+| `invoice.paid`                    | `payment.succeeded`     |
+| `invoice.payment_failed`          | `payment.failed`        |
+
+#### Variables Captured per Event
+
+| Field          | Source in Stripe Payload                                         |
+| -------------- | ---------------------------------------------------------------- |
+| `amount`       | `data.object.amount` / `amount_total` / `amount_paid` (in cents) |
+| `currency`     | `data.object.currency` (ISO 4217, lowercased)                   |
+| `status`       | `data.object.status`                                             |
+| `eventType`    | Mapped from Stripe event type                                    |
+| `projectId`    | `data.object.metadata.projectId`                                 |
+| `visitorId`    | `data.object.metadata.visitorId`                                 |
+| `deviceId`     | `data.object.metadata.deviceId`                                  |
+
+---
+
+### 2. Paddle
+
+#### Passing Metadata at Checkout
+Pass attribution data using Paddle's `custom_data` field:
+
+```js
+// Node.js (Paddle Billing)
+const transaction = await paddle.transactions.create({
+  items: [{ price_id: 'pri_xxx', quantity: 1 }],
+  custom_data: {
+    projectId: 'your-vision-project-id',  // required
+    visitorId: visionVisitorId,            // recommended
+    deviceId: visionDeviceId,              // optional fallback
+  },
+});
+```
+
+Or with Paddle.js inline checkout:
+
+```js
+Paddle.Checkout.open({
+  items: [{ priceId: 'pri_xxx', quantity: 1 }],
+  customData: {
+    projectId: 'your-vision-project-id',
+    visitorId: visionVisitorId,
+    deviceId: visionDeviceId,
+  },
+});
+```
+
+#### Tracked Paddle Events
+
+| Paddle Event                 | Vision Event Type        |
+| ---------------------------- | ----------------------- |
+| `transaction.completed`      | `payment.succeeded`     |
+| `transaction.payment_failed` | `payment.failed`        |
+| `transaction.refunded`       | `payment.refunded`      |
+| `subscription.created`       | `subscription.created`  |
+| `subscription.updated`       | `subscription.updated`  |
+| `subscription.cancelled`     | `subscription.cancelled`|
+| `subscription.paused`        | `subscription.updated`  |
+
+#### Variables Captured per Event
+
+| Field        | Source in Paddle Payload                             |
+| ------------ | ---------------------------------------------------- |
+| `amount`     | `data.details.totals.grand_total` (smallest unit)    |
+| `currency`   | `data.currency_code` (lowercased)                    |
+| `status`     | `data.status`                                        |
+| `projectId`  | `data.custom_data.projectId`                         |
+| `visitorId`  | `data.custom_data.visitorId`                         |
+| `deviceId`   | `data.custom_data.deviceId`                          |
+
+---
+
+### 3. Polar
+
+#### Passing Metadata at Checkout
+
+```js
+// Node.js
+const checkout = await polar.checkouts.create({
+  productPriceId: 'price_xxx',
+  metadata: {
+    projectId: 'your-vision-project-id',
+    visitorId: visionVisitorId,
+    deviceId: visionDeviceId,
+  },
+});
+```
+
+#### Tracked Polar Events
+
+| Polar Event              | Vision Event Type        |
+| ------------------------ | ----------------------- |
+| `order.created`          | `payment.succeeded`     |
+| `subscription.created`   | `subscription.created`  |
+| `subscription.updated`   | `subscription.updated`  |
+| `subscription.cancelled` | `subscription.cancelled`|
+| `subscription.revoked`   | `subscription.cancelled`|
+
+#### Variables Captured per Event
+
+| Field        | Source in Polar Payload                              |
+| ------------ | ---------------------------------------------------- |
+| `amount`     | `data.amount` (in cents)                             |
+| `currency`   | `data.currency` (lowercased)                         |
+| `status`     | `data.status`                                        |
+| `projectId`  | `data.metadata.projectId`                            |
+| `visitorId`  | `data.metadata.visitorId`                            |
+| `deviceId`   | `data.metadata.deviceId`                             |
+
+---
+
+### 4. LemonSqueezy
+
+#### Passing Metadata at Checkout
+
+```js
+// Node.js
+const checkout = await lemonsqueezy.createCheckout({
+  storeId: 'your-store-id',
+  variantId: 'variant-id',
+  checkoutData: {
+    custom: {
+      projectId: 'your-vision-project-id',  // required
+      visitorId: visionVisitorId,            // recommended
+      deviceId: visionDeviceId,              // optional fallback
+    },
+  },
+});
+```
+
+#### Tracked LemonSqueezy Events
+
+| LemonSqueezy Event                  | Vision Event Type        |
+| ----------------------------------- | ----------------------- |
+| `order_created`                     | `payment.succeeded`     |
+| `subscription_created`              | `subscription.created`  |
+| `subscription_updated`              | `subscription.updated`  |
+| `subscription_cancelled`            | `subscription.cancelled`|
+| `subscription_expired`              | `subscription.cancelled`|
+| `subscription_payment_success`      | `payment.succeeded`     |
+| `subscription_payment_failed`       | `payment.failed`        |
+| `subscription_payment_refunded`     | `payment.refunded`      |
+
+#### Variables Captured per Event
+
+| Field        | Source in LemonSqueezy Payload                                  |
+| ------------ | --------------------------------------------------------------- |
+| `amount`     | `data.attributes.total` or `subtotal`                           |
+| `currency`   | `data.attributes.currency` (lowercased)                         |
+| `status`     | `data.attributes.status`                                        |
+| `projectId`  | `data.attributes.meta.custom_data.projectId`                    |
+| `visitorId`  | `data.attributes.meta.custom_data.visitorId`                    |
+| `deviceId`   | `data.attributes.meta.custom_data.deviceId`                     |
+
+---
+
+## Fallback: Client-Side Revenue Tracking
+
+If you do not use one of the supported payment gateways above, or wish to track one-off in-app purchases, digital carts, or custom checkout flows directly in the browser, you can use client-side event tracking as a fallback.
+
+### HTML Data Attributes Fallback
+
+You can track revenue directly from any clickable HTML element using data attributes:
+
+```html
+<button
+  id="checkout-button"
+  data-vision-event="checkout-cart"
+  data-vision-event-revenue="19.99"
+  data-vision-event-currency="USD"
+>
+  Checkout
+</button>
+```
+
+The `data-vision-event-{key}` pattern maps any attribute key directly into the event `data` object:
+
+| Attribute                     | Maps to            | Description |
+| ----------------------------- | ------------------ | ----------- |
+| `data-vision-event`            | Event Name         | Name of the checkout event (e.g. `checkout-cart`) |
+| `data-vision-event-revenue`    | `data.revenue`     | Amount as a numeric string (e.g. `"19.99"`) |
+| `data-vision-event-currency`   | `data.currency`    | ISO 4217 3-letter currency code (defaults to `USD` if omitted) |
+| `data-vision-event-plan`       | `data.plan`        | Optional custom property (e.g. `"pro"`) |
+
+### JavaScript Tracker Function Fallback
+
+You can also trigger revenue tracking programmatically using `vision.track`:
+
+```js
+// Standard syntax
+vision.track("checkout-cart", { revenue: 19.99, currency: "USD" });
+```
+
+Or using the functional form to include existing page properties:
+
+```js
+vision.track((props) => ({
+  ...props,
+  name: "checkout-cart",
+  data: {
+    revenue: 19.99,
+    currency: "USD",
+  },
+}));
+```
+
+---
+
+## Viewing Revenue in Vision
+
+The Revenue insight aggregates all tracked payment and revenue events across your specified time period.
+
+1. Navigate to your project in the Vision dashboard.
+2. Open the **Revenue** tab.
+3. Select your desired currency filter to inspect total revenue, average order value, and conversion sources.

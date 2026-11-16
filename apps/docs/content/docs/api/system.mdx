@@ -1,0 +1,67 @@
+---
+title: System & Health
+---
+
+Public system metadata, healthcheck, and runtime diagnostics endpoints.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/heartbeat
+GET NEXT_PUBLIC_API_URL/config
+GET NEXT_PUBLIC_API_URL/flush-queue (Deprecated)
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/heartbeat
+
+Performs a lightweight liveness check to verify that the backend API service is running and healthy.
+
+**Sample response**
+
+```json
+{
+  "ok": true
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/config
+
+Returns non-sensitive server feature flags and configuration settings.
+
+**Sample response**
+
+```json
+{
+  "cloudMode": true,
+  "analyticsBackend": "tinybird",
+  "faviconUrl": "https://...",
+  "linksUrl": "https://...",
+  "pixelsUrl": "https://...",
+  "privateMode": false,
+  "telemetryDisabled": false,
+  "trackerScriptName": "script.js",
+  "updatesDisabled": false
+}
+```
+
+---
+
+## Deprecated Endpoints
+
+### GET NEXT_PUBLIC_API_URL/flush-queue
+
+> [!WARNING]
+> This endpoint is deprecated. Batch queue flushing and database persistence are handled automatically by the internal batch ingestion worker.
+
+**Response**
+
+```json
+{
+  "success": true,
+  "message": "This endpoint is deprecated. Batch insertion is now handled internally by the batch-worker microservice."
+}
+```

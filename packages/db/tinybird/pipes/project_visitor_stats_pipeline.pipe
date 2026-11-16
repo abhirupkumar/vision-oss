@@ -1,0 +1,20 @@
+DESCRIPTION >
+    Populates visitor stats from project events
+
+NODE project_visitor_stats_mv
+SQL >
+    SELECT
+        project_id,
+        visitor_id,
+        toDate(min(created_at)) AS visitor_date,
+        minState(created_at) AS start_time,
+        maxState(created_at) AS last_seen,
+        uniqState(session_id) AS total_sessions,
+        sumState(CAST(0 AS Decimal(18, 4))) AS total_revenue
+    FROM project_event
+    GROUP BY
+        project_id,
+        visitor_id
+
+TYPE materialized
+DATASOURCE project_visitor_stats

@@ -1,0 +1,10 @@
+{
+  "name": "@vision/components",
+  "version": "0.1.0",
+  "description": "Vision React components.",
+  "author": "Abhirup Kumar Bhowmick <founder@vision.dev>",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts"
+}

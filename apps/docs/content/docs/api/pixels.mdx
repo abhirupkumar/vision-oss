@@ -1,0 +1,161 @@
+---
+title: Pixels
+---
+
+Operations around Pixels management.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/pixels
+POST NEXT_PUBLIC_API_URL/pixels
+GET NEXT_PUBLIC_API_URL/pixels/:pixelId
+POST NEXT_PUBLIC_API_URL/pixels/:pixelId
+DELETE NEXT_PUBLIC_API_URL/pixels/:pixelId
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/pixels
+
+Returns all user pixels.
+
+**Parameters**
+
+| Parameter  | Type   | Description                                       |
+| ---------- | ------ | ------------------------------------------------- |
+| `search`   | string | (optional) Search text.                           |
+| `page`     | number | (optional, default 1) Determines page.            |
+| `pageSize` | number | (optional) Determines how many results to return. |
+
+**Sample response**
+
+```json
+{
+  "data": [
+    {
+      "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "name": "Vision Pixel",
+      "slug": "xxxxxxxx",
+      "userId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "organizationId": null,
+      "createdAt": "2025-10-27T18:50:54.079Z",
+      "updatedAt": "2025-10-27T18:50:54.079Z",
+      "deletedAt": null
+    }
+  ],
+  "count": 1,
+  "page": 1,
+  "pageSize": 20
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/pixels
+
+Creates a pixel.
+
+**Parameters**
+
+| Parameter | Type   | Description                                                    |
+| --------- | ------ | -------------------------------------------------------------- |
+| `name`    | string | The pixel's name.                                              |
+| `slug`    | string | The pixel's URL slug (minimum 8 characters).                   |
+| `organizationId`  | string | (optional) The ID of the organization the pixel will be created under. |
+
+**Request body**
+
+```json
+{
+  "name": "Vision Pixel",
+  "slug": "pixel123"
+}
+```
+
+**Sample response**
+
+```json
+{
+  "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "name": "Vision Pixel",
+  "slug": "pixel123",
+  "userId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "organizationId": null,
+  "createdAt": "2025-10-27T18:50:54.079Z",
+  "updatedAt": "2025-10-27T18:50:54.079Z",
+  "deletedAt": null
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/pixels/:pixelId
+
+Gets a pixel by ID.
+
+**Sample response**
+
+```json
+{
+  "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "name": "Vision Pixel",
+  "slug": "xxxxxxxx",
+  "userId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "organizationId": null,
+  "createdAt": "2025-10-27T18:50:54.079Z",
+  "updatedAt": "2025-10-27T18:50:54.079Z",
+  "deletedAt": null
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/pixels/:pixelId
+
+Updates a pixel.
+
+**Parameters**
+
+| Parameter | Type   | Description                                             |
+| --------- | ------ | ------------------------------------------------------- |
+| `name`    | string | (optional) The pixel's name.                            |
+| `slug`    | string | (optional) The pixel's URL slug (minimum 8 characters). |
+
+**Request body**
+
+```json
+{
+  "name": "Vision Pixel",
+  "slug": "abcde123"
+}
+```
+
+**Sample response**
+
+```json
+{
+  "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "name": "Vision Pixel",
+  "slug": "abcde123",
+  "userId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "organizationId": null,
+  "createdAt": "2025-10-27T18:50:54.079Z",
+  "updatedAt": "2025-10-30T23:11:18.627Z",
+  "deletedAt": null
+}
+```
+
+---
+
+## DELETE NEXT_PUBLIC_API_URL/pixels/:pixelId
+
+Deletes a pixel.
+
+**Sample response**
+
+```json
+{
+  "ok": true
+}
+```

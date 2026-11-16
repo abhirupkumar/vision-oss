@@ -1,0 +1,168 @@
+---
+title: Links
+---
+
+Operations around Links management.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/links
+POST NEXT_PUBLIC_API_URL/links
+GET NEXT_PUBLIC_API_URL/links/:linkId
+POST NEXT_PUBLIC_API_URL/links/:linkId
+DELETE NEXT_PUBLIC_API_URL/links/:linkId
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/links
+
+Returns all user links.
+
+**Parameters**
+
+| Parameter  | Type   | Description                                       |
+| ---------- | ------ | ------------------------------------------------- |
+| `search`   | string | (optional) Search text.                           |
+| `page`     | number | (optional, default 1) Determines page.            |
+| `pageSize` | number | (optional) Determines how many results to return. |
+
+**Sample response**
+
+```json
+{
+  "data": [
+    {
+      "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "name": "Vision",
+      "url": "https://example.com",
+      "slug": "xxxxxxxx",
+      "userId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "organizationId": null,
+      "createdAt": "2025-10-27T18:49:39.383Z",
+      "updatedAt": "2025-10-27T18:49:39.383Z",
+      "deletedAt": null
+    }
+  ],
+  "count": 1,
+  "page": 1,
+  "pageSize": 20
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/links
+
+Creates a link.
+
+**Parameters**
+
+| Parameter | Type   | Description                                                   |
+| --------- | ------ | ------------------------------------------------------------- |
+| `name`    | string | The link's name.                                              |
+| `url`     | string | The link's destination URL.                                   |
+| `slug`    | string | The link's URL slug (minimum 8 characters).                   |
+| `organizationId`  | string | (optional) The ID of the organization the link will be created under. |
+
+**Request body**
+
+```json
+{
+  "name": "Vision",
+  "url": "https://example.com",
+  "slug": "vision123"
+}
+```
+
+**Sample response**
+
+```json
+{
+  "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "name": "Vision",
+  "url": "https://example.com",
+  "slug": "vision123",
+  "userId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "organizationId": null,
+  "createdAt": "2025-10-27T18:49:39.383Z",
+  "updatedAt": "2025-10-27T18:49:39.383Z",
+  "deletedAt": null
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/links/:linkId
+
+Gets a link by ID.
+
+**Sample response**
+
+```json
+{
+  "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "name": "Vision",
+  "url": "https://example.com",
+  "slug": "xxxxxxxx",
+  "userId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "organizationId": null,
+  "createdAt": "2025-10-27T18:49:39.383Z",
+  "updatedAt": "2025-10-27T18:49:39.383Z",
+  "deletedAt": null
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/links/:linkId
+
+Updates a link.
+
+**Parameters**
+
+| Parameter | Type   | Description                                            |
+| --------- | ------ | ------------------------------------------------------ |
+| `name`    | string | (optional) The link's name.                            |
+| `url`     | string | (optional) The link's destination URL.                 |
+| `slug`    | string | (optional) The link's URL slug (minimum 8 characters). |
+
+**Request body**
+
+```json
+{
+  "name": "Vision",
+  "url": "https://example.com"
+}
+```
+
+**Sample response**
+
+```json
+{
+  "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "name": "Vision",
+  "url": "https://example.com",
+  "slug": "xxxxxxxx",
+  "userId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "organizationId": null,
+  "createdAt": "2025-10-27T18:49:39.383Z",
+  "updatedAt": "2025-10-30T23:06:01.824Z",
+  "deletedAt": null
+}
+```
+
+---
+
+## DELETE NEXT_PUBLIC_API_URL/links/:linkId
+
+Deletes a link.
+
+**Sample response**
+
+```json
+{
+  "ok": true
+}
+```

@@ -1,0 +1,10 @@
+{
+  "projectCreate": {
+    "name": "Cypress Project",
+    "domain": "cypress.com"
+  },
+  "projectUpdate": {
+    "name": "Cypress Project Updated",
+    "domain": "cypressupdated.com"
+  }
+}

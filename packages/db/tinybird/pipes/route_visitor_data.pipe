@@ -1,0 +1,17 @@
+NODE route
+SQL >
+    SELECT
+        project_id,
+        visitor_id,
+        distinct_id,
+        data_key,
+        data_type,
+        string_value,
+        number_value,
+        date_value,
+        created_at
+    FROM k_properties
+    WHERE stream_type = 'visitor_data'
+
+TYPE materialized
+DATASOURCE visitor_data

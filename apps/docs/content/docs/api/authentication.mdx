@@ -1,0 +1,103 @@
+---
+title: Authentication
+---
+
+Vision uses Clerk for identity and access management. All protected API routes require a valid session Bearer token passed in the `Authorization` header.
+
+## Bearer Token Authorization
+
+To authenticate your requests, pass your Clerk session token with the `Bearer` scheme in the `Authorization` header:
+
+```http
+Authorization: Bearer <your-session-token>
+```
+
+For example, using `curl`:
+
+```bash
+curl NEXT_PUBLIC_API_URL/projects \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer <your-session-token>"
+```
+
+In client applications using the Clerk SDK:
+
+```typescript
+import { useAuth } from '@clerk/nextjs';
+
+const { getToken } = useAuth();
+const token = await getToken();
+
+const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects`, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/auth/verify
+
+Verifies the user's Clerk session token, links or provisions the internal user record in Vision, and returns the authenticated user profile, organization memberships, and roles.
+
+**Headers**
+
+```http
+Authorization: Bearer <your-session-token>
+```
+
+**Request**
+
+This endpoint accepts a `POST` request with the Bearer token in the `Authorization` header. No request body is required.
+
+**Sample response**
+
+```json
+{
+  "id": "c7a6e11b-3b4e-4f3b-8219-482a5c2d1b82",
+  "clerkId": "user_2test123abc456",
+  "email": "user@example.com",
+  "role": "user",
+  "displayName": "Alex Doe",
+  "logoUrl": "https://img.clerk.com/...",
+  "createdAt": "2026-01-15T10:00:00.000Z",
+  "updatedAt": "2026-01-15T10:00:00.000Z",
+  "deletedAt": null,
+  "members": [
+    {
+      "id": "m1a2b3c4-0000-0000-0000-000000000001",
+      "userId": "c7a6e11b-3b4e-4f3b-8219-482a5c2d1b82",
+      "organizationId": "org_987654321",
+      "role": "admin",
+      "createdAt": "2026-01-15T10:00:00.000Z",
+      "organization": {
+        "id": "org_987654321",
+        "name": "Acme Corp",
+        "slug": "acme-corp"
+      }
+    }
+  ],
+  "organizations": [
+    {
+      "id": "org_987654321",
+      "name": "Acme Corp",
+      "slug": "acme-corp"
+    }
+  ]
+}
+```
+
+---
+
+## Public Endpoints
+ 
+The following routes do not require Clerk authentication:
+- `POST NEXT_PUBLIC_API_URL/send`: Ingestion route for tracking events and page views.
+- `POST NEXT_PUBLIC_API_URL/batch`: Batch event ingestion route.
+- `POST NEXT_PUBLIC_API_URL/record`: Session replay recording chunks.
+- `POST NEXT_PUBLIC_API_URL/errors`: Client runtime error span ingestion.
+- `GET NEXT_PUBLIC_API_URL/share/:id`: Public shared project view when `shareId` is configured.
+- `ALL NEXT_PUBLIC_API_URL/llm-proxy/:provider/*`: Transparent LLM proxy with project header authentication.
+- `GET NEXT_PUBLIC_API_URL/config`: Public feature and runtime configuration.
+- `GET NEXT_PUBLIC_API_URL/heartbeat`: Health check route.

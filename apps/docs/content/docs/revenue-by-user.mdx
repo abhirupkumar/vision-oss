@@ -1,0 +1,81 @@
+---
+title: Revenue-by-User Instrumentation Guide
+---
+
+Tracking revenue at the customer level allows Vision to calculate per-user gross margins by subtracting continuous model inference costs from subscription payments.
+
+## 1. Instrumenting User Identity in AI Requests
+
+When sending requests through the Vision LLM proxy or SDK, pass the `X-Vision-User-Id` header:
+
+```typescript
+const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/llm-proxy/openrouter/v1/chat/completions`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+    'X-Vision-Project': 'your-project-id',
+    'X-Vision-User-Id': user.id, // Authenticated customer user ID
+  },
+  body: JSON.stringify({
+    model: 'gpt-4o',
+    messages: [{ role: 'user', content: 'Generate quarterly report' }],
+  }),
+});
+```
+
+Using the Vision Node/Browser SDK:
+
+```typescript
+import { vision } from '@vision/node';
+
+vision.identify({
+  userId: user.id,
+  email: user.email,
+  plan: 'Enterprise',
+});
+```
+
+---
+
+## 2. Connecting Payment Providers
+
+Vision automatically ingests payment events from Stripe, Paddle, Polar, and Lemon Squeezy via webhooks.
+
+### Stripe Checkout Metadata
+When creating a Stripe Checkout Session or Customer Subscription, include `userId` in the `metadata`:
+
+```typescript
+const session = await stripe.checkout.sessions.create({
+  customer_email: user.email,
+  line_items: [{ price: 'price_enterprise_monthly', quantity: 1 }],
+  mode: 'subscription',
+  metadata: {
+    projectId: 'your-project-id',
+    userId: user.id, // Matches X-Vision-User-Id
+  },
+  success_url: 'https://yourapp.com/dashboard?session_id={CHECKOUT_SESSION_ID}',
+});
+```
+
+### Paddle Webhook Mapping
+For Paddle billing, pass `custom_data`:
+
+```json
+{
+  "custom_data": {
+    "projectId": "your-project-id",
+    "userId": "usr_9942a1"
+  }
+}
+```
+
+---
+
+## 3. Reconciling Telemetry
+
+Once both user LLM calls and subscription webhooks are connected, Vision automatically joins:
+1. `project_revenue` (payments from the `business` Kafka topic)
+2. `llm_events` (inference tokens from the `events` Kafka topic)
+
+Results appear immediately in the **Revenue Analytics** and **Unit Economics** dashboard views.

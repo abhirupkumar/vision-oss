@@ -1,0 +1,27 @@
+SCHEMA >
+    `project_id`      String,
+    `session_id`      String,
+    `session_date`    Date,
+    `visitor_id`      AggregateFunction(argMax, String, DateTime64(3, 'UTC')),
+    `browser`         AggregateFunction(argMax, String, DateTime64(3, 'UTC')),
+    `os`              AggregateFunction(argMax, String, DateTime64(3, 'UTC')),
+    `device`          AggregateFunction(argMax, String, DateTime64(3, 'UTC')),
+    `country`         AggregateFunction(argMax, String, DateTime64(3, 'UTC')),
+    `hostname`        AggregateFunction(argMax, String, DateTime64(3, 'UTC')),
+    `screen`          AggregateFunction(argMax, String, DateTime64(3, 'UTC')),
+    `language`        AggregateFunction(argMax, String, DateTime64(3, 'UTC')),
+    `region`          AggregateFunction(argMax, String, DateTime64(3, 'UTC')),
+    `city`            AggregateFunction(argMax, String, DateTime64(3, 'UTC')),
+    `start_time`      AggregateFunction(min, DateTime64(3, 'UTC')),
+    `end_time`        AggregateFunction(max, DateTime64(3, 'UTC')),
+    `views`           AggregateFunction(sum, UInt64),
+    `events`          AggregateFunction(sum, UInt64),
+    `revenue`         AggregateFunction(sum, Decimal(18, 4))
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(session_date)"
+ENGINE_SORTING_KEY "project_id, session_id, session_date"
+ENGINE_TTL "session_date + toIntervalYear(2)"
+
+FORWARD_QUERY >
+    SELECT *

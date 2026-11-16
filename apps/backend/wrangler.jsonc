@@ -1,0 +1,14 @@
+{
+	"name": "api-vision",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-02-10",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"observability": {
+		"enabled": true
+	},
+	"vars": {
+		"VAPID_SUBJECT": "mailto:admin@vision.is"
+	}
+}

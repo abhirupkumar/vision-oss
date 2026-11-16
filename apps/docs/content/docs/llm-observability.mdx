@@ -1,0 +1,236 @@
+---
+title: LLM Observability
+description: Track LLM costs, usage, and latency with zero integration effort using Vision's LLM Proxy.
+---
+
+Vision provides a powerful **zero-latency LLM proxy** that automatically tracks tokens, costs, latency, TTFT (Time To First Token), and traces for your LLM applications.
+
+Instead of installing heavy SDKs or wrapping your code, you simply change your provider's `baseURL` to point to Vision, and add your Project ID in a header. Vision intercepts the request, forwards it to the provider, streams the response back to your client instantly, and logs the metrics in the background.
+
+## Supported Providers
+
+Vision currently supports all major providers natively:
+- OpenAI
+- Anthropic
+- Google Gemini
+- Mistral
+- Groq
+- Cohere
+- Together AI
+
+## Quick Start (OpenAI Example)
+
+```typescript
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY, // Your real OpenAI key
+  baseURL: "https://api.visionanalytics.com/llm-proxy/openai/v1", // Point to Vision
+  defaultHeaders: {
+    "X-Vision-Project": "proj_1234567890", // Your Vision Project ID
+  },
+});
+
+// Use the client normally!
+const response = await openai.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "Hello!" }],
+});
+```
+
+## Security & Privacy
+
+1. **No Key Storage**: Vision never stores your provider API keys. They are only held in memory for the duration of the request and forwarded securely.
+2. **Zero Added Latency**: Responses are intercepted using Web Streams and forwarded to your client immediately as they arrive from the provider.
+3. **Data Truncation**: Prompts and completions are automatically truncated at 50,000 characters to prevent database bloat and unbounded storage costs.
+
+---
+
+## Metadata Headers Reference
+
+You can pass additional metadata using `X-Vision-*` headers to enrich your traces and correlate LLM activity with user analytics:
+
+| Header | Description | Example |
+|---|---|---|
+| `X-Vision-Project` | **Required**. Your Vision Project ID | `proj_1234567890` |
+| `X-Vision-User-Id` | The end-user's ID in your application | `user_123` |
+| `X-Vision-Session-Id` | The user's active analytics session ID | `sess_abc` |
+| `X-Vision-Tags` | Comma-separated array of tags for grouping | `production,rag,onboarding` |
+| `X-Vision-Template-Name` | Name of the prompt template used | `support-agent-v2` |
+| `X-Vision-Trace-Id` | Link this request to a larger distributed trace | `trace_...` |
+
+---
+
+## How to Get These IDs
+
+### 1. From the Vision Browser Tracker Script (`window.vision`)
+
+If you have the Vision tracking script embedded on your website or web app, the tracker automatically generates and maintains user and session identifiers. You can access them directly via the global `window.vision` object:
+
+```javascript
+// Retrieve current session, visitor, and device IDs from the tracker
+const { sessionId, visitorId, deviceId } = window.vision.getIds();
+
+// Or get session information directly
+const session = window.vision.getSession();
+const activeSessionId = session?.sessionId;
+```
+
+#### Correlating Frontend Sessions with Backend LLM Calls
+
+To link an LLM trace to the user's web analytics session in your Vision dashboard, forward the session ID from your frontend to your backend API route:
+
+```typescript
+// Frontend (React / Next.js / Vanilla JS)
+const { sessionId } = window.vision.getIds();
+
+const response = await fetch("/api/chat", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    // Forward the Vision session ID to your backend
+    "X-Session-Id": sessionId,
+  },
+  body: JSON.stringify({ message: "Help me prioritize my tasks" }),
+});
+```
+
+---
+
+### 2. From Server-Side Applications & Libraries
+
+When calling your LLM provider through Vision's proxy from your backend (e.g. Next.js Route Handlers, Express, FastAPI, or NestJS), populate the headers using your application context:
+
+#### • `X-Vision-User-Id`
+Pass the authenticated user's ID from your authentication provider:
+- **Clerk**: `auth().userId`
+- **NextAuth / Auth.js**: `session.user.id`
+- **Supabase**: `user.id`
+- **Firebase**: `decodedToken.uid`
+- **Custom Auth**: Database user ID / UUID
+
+If the user was identified on the frontend via `vision.identify("user_123")`, pass the same user ID in `X-Vision-User-Id` to connect web analytics directly to model spend.
+
+#### • `X-Vision-Session-Id`
+Pass the session ID forwarded from `window.vision.getIds().sessionId` (from the client request headers) or your server-managed session ID.
+
+#### • `X-Vision-Trace-Id`
+To trace multi-step LLM operations (e.g. agent loops, RAG retrieval + generation, or multi-model chains) under a single waterfall:
+- Generate a UUID using `crypto.randomUUID()`.
+- Or extract the trace ID from OpenTelemetry: `trace.getActiveSpan()?.spanContext().traceId`.
+- Or read the incoming distributed W3C trace header (`traceparent`).
+
+#### • `X-Vision-Template-Name`
+Pass a string identifier for the prompt template used (e.g. `customer-support-v2`, `sql-generator-v1`). In your Vision dashboard, the **Prompt Template Performance** table aggregates latency, costs, and quality scores by this name.
+
+#### • `X-Vision-Tags`
+Pass a comma-separated list of tags to filter and segment traces in the dashboard:
+- Environment: `production`, `staging`
+- Feature name: `rag`, `code-review`, `onboarding`
+- Model tier: `reasoning`, `fallback`
+
+---
+
+## Complete End-to-End Implementation
+
+### Next.js App Router (Backend Route Handler)
+
+```typescript
+// app/api/chat/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import OpenAI from "openai";
+import { auth } from "@clerk/nextjs/server"; // Or your auth provider
+
+export async function POST(req: NextRequest) {
+  const { message } = await req.json();
+
+  // 1. Get authenticated user ID
+  const { userId } = await auth();
+
+  // 2. Get the Vision session ID forwarded from window.vision on the frontend
+  const sessionId = req.headers.get("x-session-id") ?? undefined;
+
+  // 3. Generate a trace ID for this request or agent workflow
+  const traceId = req.headers.get("x-trace-id") ?? crypto.randomUUID();
+
+  // 4. Initialize client pointing to Vision LLM Proxy
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: "https://api.visionanalytics.com/llm-proxy/openai/v1",
+    defaultHeaders: {
+      "X-Vision-Project": process.env.VISION_PROJECT_ID!,
+      "X-Vision-User-Id": userId ?? "anonymous",
+      "X-Vision-Session-Id": sessionId,
+      "X-Vision-Trace-Id": traceId,
+      "X-Vision-Template-Name": "productivity-coach-v1",
+      "X-Vision-Tags": `${process.env.NODE_ENV},rag,assistant`,
+    },
+  });
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      { role: "system", content: "You are a helpful productivity assistant." },
+      { role: "user", content: message },
+    ],
+  });
+
+  return NextResponse.json(completion);
+}
+```
+
+---
+
+### Python (OpenAI SDK Example)
+
+```python
+import os
+import uuid
+from openai import OpenAI
+
+trace_id = str(uuid.uuid4())
+
+client = OpenAI(
+    api_key=os.environ.get("OPENAI_API_KEY"),
+    base_url="https://api.visionanalytics.com/llm-proxy/openai/v1",
+    default_headers={
+        "X-Vision-Project": os.environ.get("VISION_PROJECT_ID"),
+        "X-Vision-User-Id": "user_456",
+        "X-Vision-Session-Id": "sess_xyz",
+        "X-Vision-Trace-Id": trace_id,
+        "X-Vision-Template-Name": "data-extractor-v3",
+        "X-Vision-Tags": "production,data-pipeline",
+    },
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Extract the key entities from this text..."}],
+)
+
+print(response.choices[0].message.content)
+```
+
+---
+
+### Groq Example with Reasoning Models
+
+```typescript
+import OpenAI from "openai";
+
+const groq = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.visionanalytics.com/llm-proxy/groq/v1",
+  defaultHeaders: {
+    "X-Vision-Project": process.env.VISION_PROJECT_ID!,
+    "X-Vision-User-Id": "user_789",
+    "X-Vision-Template-Name": "reasoning-task-v1",
+    "X-Vision-Tags": "production,groq,deepseek-r1",
+  },
+});
+
+const response = await groq.chat.completions.create({
+  model: "llama-3.3-70b-versatile",
+  messages: [{ role: "user", content: "Explain quantum computing in simple terms." }],
+});
+```

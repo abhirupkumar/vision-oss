@@ -1,0 +1,42 @@
+---
+title: Getting Started
+---
+
+Vision is a fully managed SaaS platform, meaning there are no servers to configure, no databases to maintain, and no software to deploy. Getting up and running takes less than a minute.
+
+## 1. Create an Account
+
+Head over to the [Vision](#) platform and create your account.
+
+## 2. Add a Website
+
+Once you are logged in, navigate to **Websites** and click **Add Website**.
+
+- **Name**: A descriptive name for your website.
+- **Domain**: The domain name of the website you want to track (e.g., `example.com`).
+
+Click **Save** to generate your unique tracking code.
+
+## 3. Install the Tracking Script
+
+After adding your website, click on the **Edit** button (pencil icon) next to your newly created website and navigate to the **Tracking Code** tab.
+
+You will see a script snippet that looks like this:
+
+```html
+<script
+  defer
+  src="NEXT_PUBLIC_TRACKER_URL/script.js"
+  data-project-id="your-unique-project-id"
+></script>
+```
+
+Copy this code and paste it into the `<head>` section of your website's HTML on every page you want to track.
+
+> **Note**: The tracker endpoint uses your configured `NEXT_PUBLIC_TRACKER_URL/script.js` URL.
+
+## 4. Verify Data Collection
+
+Once the script is installed and deployed to your live website, visit your site in a browser.
+
+Return to the Vision dashboard and check the **Realtime** view or your website's main dashboard. You should see your visit recorded immediately!

@@ -1,0 +1,68 @@
+---
+title: Errors
+---
+
+Operations for querying captured JavaScript runtime exceptions and unhandled promise rejections.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/projects/:projectId/errors
+GET NEXT_PUBLIC_API_URL/projects/:projectId/errors/summary
+GET NEXT_PUBLIC_API_URL/projects/:projectId/errors/chart
+GET NEXT_PUBLIC_API_URL/projects/:projectId/errors/types
+GET NEXT_PUBLIC_API_URL/projects/:projectId/errors/by-page
+GET NEXT_PUBLIC_API_URL/projects/:projectId/errors/groups/:fingerprint
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/errors
+
+Returns recent individual error logs with stack traces, browser info, and URLs.
+
+**Sample response**
+
+```json
+[
+  {
+    "id": "err_123",
+    "fingerprint": "TypeError: Cannot read property 'map' of undefined",
+    "message": "Cannot read property 'map' of undefined",
+    "url": "/dashboard",
+    "browser": "Chrome",
+    "os": "macOS",
+    "createdAt": "2026-02-18T11:45:00.000Z"
+  }
+]
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/errors/summary
+
+Returns total error count, unique issue groups, and affected user percentages.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/errors/chart
+
+Returns error frequency over time bucketed by interval.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/errors/types
+
+Returns error groupings categorized by exception type (e.g. `TypeError`, `ReferenceError`, `NetworkError`).
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/errors/by-page
+
+Returns error occurrence counts broken down by page URL path.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/errors/groups/:fingerprint
+
+Fetches detailed occurrences, stack traces, and first/last seen timestamps for an individual error fingerprint group.

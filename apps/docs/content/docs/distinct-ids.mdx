@@ -1,0 +1,106 @@
+---
+title: Distinct IDs
+---
+
+A Distinct ID is a unique identifier assigned to a user, either anonymously or when they log in.
+This allows you to associate actions (page views, clicks, conversions) with a single user across multiple sessions.
+For a more extensive way to attach user traits, take a look at [User Traits and Properties](/docs/tracker-functions#user-traits-and-properties).
+
+## Use Cases
+
+- Properly attribute user behavior.
+- Connect events across multiple sessions or devices.
+- Identify repeat users vs. new users.
+- Build out journeys and profiles based on user history.
+
+## Usage
+
+You can set a Distinct ID using either the HTML script tag or the JavaScript/TypeScript SDK:
+
+### HTML Script Tag (`<script>`)
+
+```js
+// Identify with user ID
+window.vision.identify("usr_12345");
+
+// Identify with user ID and custom traits
+window.vision.identify("usr_12345", {
+  email: "alex@example.com",
+  plan: "pro",
+});
+```
+
+### JavaScript / TypeScript SDK (`@vision/browser`)
+
+```typescript
+import { identify } from "@vision/browser";
+
+// Identify with user ID and traits
+identify("usr_12345", {
+  email: "alex@example.com",
+  plan: "pro",
+});
+```
+
+### Direct HTTP API
+
+You can also pass the **id** property in the event payload when using the [Sending stats](/docs/api/sending-stats) endpoint:
+
+```json
+{
+  "payload": {
+    "hostname": "your-hostname",
+    "language": "en-US",
+    "referrer": "",
+    "screen": "1920x1080",
+    "title": "dashboard",
+    "url": "/",
+    "project": "your-project-id",
+    "id": "usr_12345"
+  },
+  "type": "event"
+}
+```
+
+The **id** property has a 50 character limit. If your identifiers are longer, consider using a hash or shortened version.
+
+---
+
+## Resetting Identity on Logout (`reset`)
+
+> [!IMPORTANT]
+> **We strongly recommend calling `reset()` whenever a user logs out.**  
+> Vision persists the user's Distinct ID in browser `localStorage`. If `reset()` is not called upon logout, subsequent activity on a shared computer or browser will continue to be attributed to the previously logged-in user.
+
+### HTML Script Tag (`<script>`)
+
+```js
+// Call when the user signs out
+window.vision.reset();
+```
+
+### JavaScript / TypeScript SDK (`@vision/browser`)
+
+```typescript
+import { reset } from "@vision/browser";
+
+// Call when the user signs out
+reset();
+```
+
+Calling `reset()` immediately:
+1. Clears the persisted identity and traits from `localStorage`.
+2. Generates a fresh, anonymous visitor ID for subsequent navigation and events.
+3. Ensures complete data isolation between different user accounts.
+
+For full details on anonymous visitor stitching and identity lifecycle, see [Autocapture & Identity](/docs/autocapture).
+
+## Search
+
+Navigate to **Sessions** to view visitor activity.
+
+![image](/images/docs/traffic-navbar.png)
+
+Search for a specific **Distinct ID** to view all connected sessions for that time range.
+
+![image](/images/docs/distinct-id-search.png)

@@ -1,0 +1,78 @@
+---
+title: Session Replays
+---
+
+Operations for managing and retrieving session recordings.
+
+**Recording & Ingestion**
+
+```text
+GET NEXT_PUBLIC_TRACKER_URL/recorder.js
+POST NEXT_PUBLIC_API_URL/record
+```
+
+**Query Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/projects/:projectId/replays
+GET NEXT_PUBLIC_API_URL/projects/:projectId/replays/saved
+GET NEXT_PUBLIC_API_URL/projects/:projectId/replays/:sessionId/chunks
+```
+
+---
+
+## Client Replay Recorder
+
+Include the recorder script on your website to capture DOM mutations, user clicks, and scroll events:
+
+```html
+<script
+  defer
+  src="NEXT_PUBLIC_TRACKER_URL/recorder.js"
+  data-project-id="your-project-id"
+  data-sample-rate="0.15"
+  data-mask-level="moderate"
+  data-max-duration="300000"
+></script>
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/record
+
+Ingestion endpoint used by `recorder.js` to stream compressed session replay chunks. This route is public and requires no user authentication header.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/replays
+
+Returns a list of recorded visitor sessions available for replay.
+
+**Sample response**
+
+```json
+[
+  {
+    "sessionId": "4bb4df47-aa72-4638-b7eb-d1cf3d84a7e9",
+    "visitorId": "f7841c2a-9f50-4822-ba35-15a968eb1a47",
+    "duration": 185,
+    "events": 42,
+    "pages": 3,
+    "browser": "Chrome",
+    "country": "US",
+    "createdAt": "2026-02-18T10:00:00.000Z"
+  }
+]
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/replays/saved
+
+Returns all bookmarked or saved session replays for team review.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/replays/:sessionId/chunks
+
+Retrieves the serialized DOM events and mutation chunks needed to replay the specified session in the player.

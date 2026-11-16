@@ -1,0 +1,41 @@
+{
+  "name": "vision-analytics",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vision Analytics monorepo — Vite dashboard + Hono backend",
+  "scripts": {
+    "dev": "turbo dev",
+    "start": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "typecheck": "turbo typecheck",
+    "db:generate": "pnpm -F @vision/db db:generate",
+    "db:push": "pnpm -F @vision/db db:push",
+    "db:studio": "pnpm -F @vision/db db:studio",
+    "tinybird:clear": "pnpm -F @vision/db tinybird:clear",
+    "db:clear": "pnpm -F @vision/db db:clear"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.8",
+    "turbo": "^2.5.4",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^19.0.0",
+      "@types/react-dom": "^19.0.0"
+    },
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "lightningcss",
+      "node-rdkafka"
+    ]
+  }
+}

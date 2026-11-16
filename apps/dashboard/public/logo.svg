@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 683" width="100%" height="100%">
+  <style>
+    .dark-logo { display: none; }
+    .light-logo { display: block; }
+    @media (prefers-color-scheme: dark) {
+      .light-logo { display: none; }
+      .dark-logo { display: block; }
+    }
+  </style>
+  <image class="light-logo" href="/logo-black.png" width="1024" height="683" />
+  <image class="dark-logo" href="/logo-white.png" width="1024" height="683" />
+</svg>

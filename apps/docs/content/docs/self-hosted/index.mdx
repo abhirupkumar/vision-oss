@@ -1,0 +1,40 @@
+---
+title: Self-Hosting Vision
+description: Learn how to self-host Vision Community Edition on your own infrastructure.
+---
+
+Vision Community Edition is completely open-source and can be self-hosted on any cloud server, VPS, or local development machine.
+
+## Choosing Your Deployment Track
+
+Vision provides two self-hosted architectures depending on your traffic volume and team requirements:
+
+### 1. Direct Ingestion Track (Recommended for 95% of Users)
+- **Best for**: Indie hackers, side projects, and teams processing fewer than 10M events per month.
+- **Architecture**: A single lightweight Docker Compose cluster containing PostgreSQL, ClickHouse, the Hono backend API, and the Next.js dashboard.
+- **Complexity**: Zero Kafka, zero ZooKeeper, boots in 60 seconds with 1 command.
+- [Read the Direct Ingestion Guide](/docs/self-hosted/direct-db)
+
+### 2. High-Throughput Streaming Track (For 10M+ Events/Month)
+- **Best for**: High-traffic apps, distributed microservices, and enterprise infrastructure.
+- **Architecture**: Edge ingestion produces to a Kafka REST Proxy buffer across 5 partitioned topics, consumed by `@vision/ingestion-worker` which flushes optimized micro-batches into ClickHouse.
+- **Complexity**: Requires Kafka broker management and consumer group monitoring.
+- [Read the High-Throughput Streaming Guide](/docs/self-hosted/kafka-streaming)
+
+---
+
+## Community Edition vs. Vision Cloud
+
+Before self-hosting, review the operational differences between running Community Edition yourself and using the fully-managed Vision Cloud service:
+
+| Capability | Self-Hosted Community | Vision Cloud (Managed) |
+| :--- | :---: | :---: |
+| **Pricing** | Free (Your Server Costs) | **$39/mo Base** (Includes $39 Credit) |
+| **Global Latency** | Single-region server (200-400ms global) | **Cloudflare Global Edge** (sub-10ms globally) |
+| **ClickHouse Maintenance** | Manual disk scaling & TTL pruning | **Zero Maintenance** Serverless Clusters |
+| **Live Customer Gross Margins** | Excluded | **Included** (Stripe/Paddle + LLM Token attribution) |
+| **AI Bill-Shock & Anomaly Alerts**| Excluded | **Included** (Automated Slack & Discord dispatch) |
+| **Cursor & Claude MCP Server** | Excluded | **Included** (Full 6-tool `@vision/mcp` server) |
+| **In-App Autonomous AI Chatbot** | Excluded | **Included** (BYOK: Gemini, OpenAI, Claude) |
+
+[View full feature comparison](/docs/self-hosted/comparison)

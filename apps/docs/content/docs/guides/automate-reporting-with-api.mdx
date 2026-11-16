@@ -1,0 +1,129 @@
+---
+title: Automate reporting with the API
+---
+
+Pull stats from Vision programmatically to build custom reports, Slack notifications, email digests, or automated dashboards.
+
+## Authentication
+
+All requests to the Vision API require authentication. Pass your bearer token in the `Authorization` header:
+
+```js
+const token = process.env.VISION_AUTH_TOKEN;
+const headers = {
+  Authorization: `Bearer ${token}`,
+  "Content-Type": "application/json",
+};
+```
+
+## Example: Daily traffic summary
+
+Fetch yesterday's stats and format them for a report:
+
+```js
+const projectId = "your-project-id";
+const now = new Date();
+const yesterday = new Date(now);
+yesterday.setDate(now.getDate() - 1);
+yesterday.setHours(0, 0, 0, 0);
+const today = new Date(yesterday);
+today.setDate(today.getDate() + 1);
+
+const stats = await fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}/stats` +
+    `?startAt=${yesterday.getTime()}&endAt=${today.getTime()}`,
+  { headers },
+).then((r) => r.json());
+
+const report = `
+📊 Daily Report — ${yesterday.toDateString()}
+Visitors: ${stats.visitors}
+Page views: ${stats.pageviews}
+Visits: ${stats.visits}
+Bounce rate: ${((stats.bounces / stats.visits) * 100).toFixed(1)}%
+`;
+```
+
+## Example: Send to Slack
+
+```js
+await fetch("https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ text: report }),
+});
+```
+
+## Example: Top pages report
+
+```js
+const metrics = await fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}/metrics` +
+    `?startAt=${yesterday.getTime()}&endAt=${today.getTime()}&type=path`,
+  { headers },
+).then((r) => r.json());
+
+const topPages = metrics
+  .sort((a, b) => b.y - a.y)
+  .slice(0, 10)
+  .map((p, i) => `${i + 1}. ${p.x} — ${p.y} views`)
+  .join("\n");
+```
+
+## Example: Weekly comparison
+
+Compare this week vs. last week to detect trends:
+
+```js
+const WEEK = 7 * 24 * 60 * 60 * 1000;
+const thisWeekEnd = Date.now();
+const thisWeekStart = thisWeekEnd - WEEK;
+const lastWeekEnd = thisWeekStart;
+const lastWeekStart = lastWeekEnd - WEEK;
+
+const thisWeek = await fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}/stats` +
+    `?startAt=${thisWeekStart}&endAt=${thisWeekEnd}`,
+  { headers },
+).then((r) => r.json());
+
+const lastWeek = await fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}/stats` +
+    `?startAt=${lastWeekStart}&endAt=${lastWeekEnd}`,
+  { headers },
+).then((r) => r.json());
+
+const change = (
+  ((thisWeek.visitors - lastWeek.visitors) / lastWeek.visitors) *
+  100
+).toFixed(1);
+const sign = Number(change) > 0 ? "+" : "";
+console.log(`Visitors: ${thisWeek.visitors} (${sign}${change}% vs last week)`);
+```
+
+## Running on a schedule
+
+Use a cron job, GitHub Actions, or a serverless function to run your reporting script on a schedule:
+
+**Cron (Linux/Mac):**
+
+```bash
+# Run daily at 8am
+0 8 * * * node /path/to/daily-report.js
+```
+
+**GitHub Actions:**
+
+```yaml
+on:
+  schedule:
+    - cron: "0 8 * * *"
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/daily-report.js
+```
+
+See the full [API reference](/docs/api) for all available endpoints.

@@ -1,0 +1,100 @@
+---
+title: API Client
+---
+
+## Overview
+
+The Vision API Client is built in TypeScript and contains typed helper functions to interact with the Vision REST API.
+
+## Requirements
+
+- [Node.js](https://nodejs.org/) version 18.18 or newer
+
+## Installation
+
+```shell
+npm install @vision/api-client
+```
+
+## Configuration
+
+Configure the API client using environment variables:
+
+```dotenv
+VISION_API_CLIENT_ENDPOINT=NEXT_PUBLIC_API_URL
+VISION_AUTH_TOKEN=your-bearer-token
+```
+
+## Usage
+
+Import the client and query using the available methods:
+
+```typescript
+import { getClient } from "@vision/api-client";
+
+const client = getClient();
+
+const { ok, data, status, error } = await client.getProjects();
+```
+
+Response format:
+
+```typescript
+{
+  ok: boolean;
+  status: number;
+  data?: T;
+  error?: any;
+}
+```
+
+---
+
+## Method Mapping
+
+### Me
+
+```text
+getMe() ⇒ GET /me
+updateMe(data) ⇒ PATCH /me
+updatePassword(data) ⇒ POST /me/password
+getMyProjects() ⇒ GET /me/projects
+getMyOrganizations() ⇒ GET /me/organizations
+```
+
+### Projects
+
+```text
+getProjects(params) ⇒ GET /projects
+createProject(data) ⇒ POST /projects
+getProject(id) ⇒ GET /projects/{id}
+updateProject(id, data) ⇒ POST /projects/{id}
+deleteProject(id) ⇒ DELETE /projects/{id}
+getProjectStats(id, params) ⇒ GET /projects/{id}/stats
+getProjectPageviews(id, params) ⇒ GET /projects/{id}/pageviews
+getProjectMetrics(id, params) ⇒ GET /projects/{id}/metrics
+getProjectActive(id) ⇒ GET /projects/{id}/active
+transferProject(id, data) ⇒ POST /projects/{id}/transfer
+```
+
+### Organizations
+
+```text
+getOrganizations() ⇒ GET /organizations
+createOrganization(data) ⇒ POST /organizations
+joinOrganization(data) ⇒ POST /organizations/join
+getOrganization(id) ⇒ GET /organizations/{id}
+updateOrganization(id, data) ⇒ POST /organizations/{id}
+deleteOrganization(id) ⇒ DELETE /organizations/{id}
+getOrganizationUsers(id) ⇒ GET /organizations/{id}/users
+getOrganizationProjects(id) ⇒ GET /organizations/{id}/projects
+```
+
+### Events & Data
+
+```text
+getProjectEvents(id, params) ⇒ GET /projects/{id}/events
+getProjectEventSeries(id, params) ⇒ GET /projects/{id}/events/series
+getEventDataEvents(id, params) ⇒ GET /projects/{id}/event-data/events
+getEventDataFields(id, params) ⇒ GET /projects/{id}/event-data/fields
+```

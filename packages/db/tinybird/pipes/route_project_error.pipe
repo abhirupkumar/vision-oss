@@ -1,0 +1,30 @@
+NODE route
+SQL >
+    SELECT
+        project_id,
+        visitor_id,
+        session_id,
+        error_id,
+        error_type,
+        message,
+        filename,
+        lineno,
+        colno,
+        stack,
+        fingerprint,
+        url_path,
+        url_query,
+        hostname,
+        browser,
+        os,
+        device,
+        country,
+        region,
+        city,
+        level,
+        created_at
+    FROM k_telemetry
+    WHERE stream_type = 'project_error'
+
+TYPE materialized
+DATASOURCE project_error

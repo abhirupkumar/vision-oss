@@ -1,0 +1,18 @@
+SCHEMA >
+    `stream_type`  String                               `json:$.stream_type`,
+    `project_id`   String                               `json:$.project_id`,
+    `visitor_id`   String          DEFAULT ''           `json:$.visitor_id`,
+    `session_id`   String          DEFAULT ''           `json:$.session_id`,
+    `chunk_index`  UInt32          DEFAULT 0            `json:$.chunk_index`,
+    `events`       String          DEFAULT ''           `json:$.events`,
+    `event_count`  UInt32          DEFAULT 0            `json:$.event_count`,
+    `started_at`   DateTime64(3, 'UTC')                 `json:$.started_at`,
+    `ended_at`     DateTime64(3, 'UTC')                 `json:$.ended_at`,
+    `created_at`   DateTime64(3, 'UTC')                 `json:$.created_at`
+
+ENGINE "Null"
+
+KAFKA_CONNECTION_NAME "aiven_kafka"
+KAFKA_TOPIC "replays"
+KAFKA_GROUP_ID "tinybird_k_replays"
+KAFKA_AUTO_OFFSET_RESET "latest"

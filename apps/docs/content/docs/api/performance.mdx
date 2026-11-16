@@ -1,0 +1,59 @@
+---
+title: Performance
+---
+
+Query Core Web Vitals and frontend performance metrics collected by the Vision tracker.
+
+**Endpoint**
+
+```text
+GET NEXT_PUBLIC_API_URL/projects/:projectId/performance
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/performance
+
+Returns aggregated Core Web Vitals metrics, including Largest Contentful Paint (LCP), Interaction to Next Paint (INP), Cumulative Layout Shift (CLS), First Contentful Paint (FCP), and Time to First Byte (TTFB).
+
+**Parameters**
+
+| Parameter | Type   | Description                                 |
+| --------- | ------ | ------------------------------------------- |
+| `startAt` | number | Start timestamp in milliseconds.            |
+| `endAt`   | number | End timestamp in milliseconds.              |
+| `url`     | string | (optional) Filter performance by page URL.  |
+| `device`  | string | (optional) Filter by device category.       |
+| `country` | string | (optional) Filter by country code.          |
+
+**Sample response**
+
+```json
+{
+  "lcp": {
+    "value": 1420,
+    "rating": "good",
+    "p75": 1850
+  },
+  "inp": {
+    "value": 45,
+    "rating": "good",
+    "p75": 80
+  },
+  "cls": {
+    "value": 0.04,
+    "rating": "good",
+    "p75": 0.08
+  },
+  "fcp": {
+    "value": 920,
+    "rating": "good",
+    "p75": 1100
+  },
+  "ttfb": {
+    "value": 180,
+    "rating": "good",
+    "p75": 240
+  }
+}
+```

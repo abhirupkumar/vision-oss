@@ -1,0 +1,47 @@
+{
+  "name": "@vision/db",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:clickhouse:push": "tsx src/scripts/push-clickhouse.ts",
+    "tinybird:clear": "tsx src/scripts/clear-tinybird.ts",
+    "migrate:visitors": "tsx src/scripts/migrate-visitors-to-tinybird.ts",
+    "db:drop-analytics-tables": "tsx src/scripts/drop-duplicate-tables.ts",
+    "seed:demo": "tsx src/scripts/seed-demo.ts",
+    "db:clear": "tsx src/scripts/clear-db.ts"
+  },
+  "dependencies": {
+    "@clickhouse/client-web": "^1.12.0",
+    "@neondatabase/serverless": "^1.1.0",
+    "@vision/shared-types": "workspace:*",
+    "@tinybirdco/sdk": "^0.0.73",
+    "date-fns": "^2.23.0",
+    "date-fns-tz": "^2.0.1",
+    "debug": "^4.4.3",
+    "drizzle-orm": "^0.45.2",
+    "kafkajs": "^2.2.4",
+    "postgres": "^3.4.9",
+    "redis": "^4.7.0",
+    "serialize-error": "^11.0.3",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.12",
+    "@types/node": "^24.13.2",
+    "dotenv": "^17.4.2",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.19.1",
+    "typescript": "^5.9.3"
+  }
+}

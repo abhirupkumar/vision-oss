@@ -1,0 +1,19 @@
+NODE route
+SQL >
+    SELECT
+        project_id,
+        session_id,
+        event_id,
+        url_path,
+        event_name,
+        data_key,
+        data_type,
+        string_value,
+        number_value,
+        date_value,
+        created_at
+    FROM k_properties
+    WHERE stream_type = 'event_data'
+
+TYPE materialized
+DATASOURCE event_data

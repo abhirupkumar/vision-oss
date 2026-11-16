@@ -1,0 +1,126 @@
+---
+title: Sessions & Visitors
+---
+
+Operations around Sessions, Session Data properties, and Visitor profiles.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/projects/:projectId/sessions
+GET NEXT_PUBLIC_API_URL/projects/:projectId/sessions/stats
+GET NEXT_PUBLIC_API_URL/projects/:projectId/sessions/weekly
+GET NEXT_PUBLIC_API_URL/projects/:projectId/sessions/:sessionId
+GET NEXT_PUBLIC_API_URL/projects/:projectId/sessions/:sessionId/activity
+GET NEXT_PUBLIC_API_URL/projects/:projectId/sessions/:sessionId/data
+GET NEXT_PUBLIC_API_URL/projects/:projectId/session-data/properties
+GET NEXT_PUBLIC_API_URL/projects/:projectId/session-data/values
+GET NEXT_PUBLIC_API_URL/projects/:projectId/visitors
+GET NEXT_PUBLIC_API_URL/projects/:projectId/visitors/:visitorId
+GET NEXT_PUBLIC_API_URL/projects/:projectId/visitors/:visitorId/activity
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/sessions
+
+Returns a paginated list of sessions recorded within the specified time range.
+
+**Sample response**
+
+```json
+{
+  "data": [
+    {
+      "id": "4bb4df47-aa72-4638-b7eb-d1cf3d84a7e9",
+      "visitorId": "f7841c2a-9f50-4822-ba35-15a968eb1a47",
+      "hostname": "myapp.com",
+      "browser": "Chrome",
+      "os": "macOS",
+      "device": "desktop",
+      "screen": "1920x1080",
+      "language": "en-US",
+      "country": "US",
+      "subdivision1": "CA",
+      "city": "San Francisco",
+      "views": 4,
+      "events": 2,
+      "totaltime": 180,
+      "firstAt": "2026-02-15T10:00:00.000Z",
+      "lastAt": "2026-02-15T10:03:00.000Z"
+    }
+  ],
+  "count": 1,
+  "page": 1,
+  "pageSize": 20
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/sessions/stats
+
+Returns aggregate session statistics such as bounce rates, average visit duration, and pageviews per session.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/sessions/weekly
+
+Returns weekly session distribution patterns grouped by day-of-week and hour-of-day.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/sessions/:sessionId
+
+Returns details for an individual session by ID.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/sessions/:sessionId/activity
+
+Returns chronological page navigation and event activity within the specified session.
+
+**Sample response**
+
+```json
+[
+  {
+    "id": "e1",
+    "urlPath": "/",
+    "pageTitle": "Home",
+    "createdAt": "2026-02-15T10:00:00.000Z"
+  },
+  {
+    "id": "e2",
+    "urlPath": "/features",
+    "pageTitle": "Features",
+    "createdAt": "2026-02-15T10:01:30.000Z"
+  }
+]
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/sessions/:sessionId/data
+
+Returns custom session data properties attached to the session via the tracking script or SDK.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/session-data/properties
+
+Returns all session property keys and summary statistics across the project.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/session-data/values
+
+Returns distinct values for a given session property key.
+
+---
+
+## Visitors Endpoints
+
+- `GET NEXT_PUBLIC_API_URL/projects/:projectId/visitors`: List identified and anonymous visitors with profile details.
+- `GET NEXT_PUBLIC_API_URL/projects/:projectId/visitors/:visitorId`: Fetch visitor profile information, distinct ID, first seen date, and traits.
+- `GET NEXT_PUBLIC_API_URL/projects/:projectId/visitors/:visitorId/activity`: Retrieve the complete cross-session activity history for a specific visitor.

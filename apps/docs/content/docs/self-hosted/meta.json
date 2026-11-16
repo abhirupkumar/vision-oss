@@ -1,0 +1,10 @@
+{
+  "title": "Self-Hosting",
+  "pages": [
+    "index",
+    "direct-db",
+    "kafka-streaming",
+    "comparison"
+  ],
+  "defaultOpen": true
+}

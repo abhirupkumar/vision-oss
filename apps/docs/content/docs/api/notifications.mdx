@@ -1,0 +1,172 @@
+---
+title: Notifications & Alerts
+---
+
+Operations for managing automated notification rules, alerting triggers, and retrieved event notifications.
+
+**Endpoints**
+
+```text
+GET NEXT_PUBLIC_API_URL/projects/:projectId/notification-rules
+POST NEXT_PUBLIC_API_URL/projects/:projectId/notification-rules
+GET NEXT_PUBLIC_API_URL/projects/:projectId/notification-rules/:ruleId
+PATCH NEXT_PUBLIC_API_URL/projects/:projectId/notification-rules/:ruleId
+DELETE NEXT_PUBLIC_API_URL/projects/:projectId/notification-rules/:ruleId
+GET NEXT_PUBLIC_API_URL/projects/:projectId/notifications
+GET NEXT_PUBLIC_API_URL/projects/:projectId/notifications/unread-count
+POST NEXT_PUBLIC_API_URL/projects/:projectId/notifications/mark-read
+GET NEXT_PUBLIC_API_URL/webhooks/slack
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/notification-rules
+
+Lists all notification and alert rules configured for the project.
+
+**Sample response**
+
+```json
+{
+  "rules": [
+    {
+      "id": "rule_01h8abc...",
+      "projectId": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+      "name": "High Error Spike Alert",
+      "sendToApp": true,
+      "sendToEmail": true,
+      "config": {
+        "trigger": "anomaly_detected",
+        "severity": "critical",
+        "recipients": [
+          { "type": "project_owner" }
+        ]
+      },
+      "createdAt": "2026-02-12T09:30:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/projects/:projectId/notification-rules
+
+Creates a new notification or alerting rule.
+
+**Request body**
+
+| Property         | Type    | Description                                                                                         |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------- |
+| `name`           | string  | **Required**. Rule name (1-255 characters).                                                         |
+| `config`         | object  | **Required**. Trigger configuration: `trigger`, `severity`, `eventName`, `metric`, `recipients`.    |
+| `sendToApp`      | boolean | (optional, default `true`) Deliver notification in-app.                                             |
+| `sendToEmail`    | boolean | (optional, default `false`) Deliver notification via email.                                        |
+| `integrationIds` | array   | (optional) Array of integration IDs (e.g. Slack webhook integration).                               |
+
+```json
+{
+  "name": "Checkout Spike Alert",
+  "config": {
+    "trigger": "event_received",
+    "eventName": "purchase",
+    "severity": "info",
+    "recipients": [
+      {
+        "type": "project_owner"
+      }
+    ]
+  },
+  "sendToApp": true,
+  "sendToEmail": false
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/notification-rules/:ruleId
+
+Fetches configuration for a specific notification rule.
+
+---
+
+## PATCH NEXT_PUBLIC_API_URL/projects/:projectId/notification-rules/:ruleId
+
+Updates an existing notification rule.
+
+**Request body**
+
+Supports partial updates to `name`, `config`, `sendToApp`, `sendToEmail`, and `integrationIds`.
+
+---
+
+## DELETE NEXT_PUBLIC_API_URL/projects/:projectId/notification-rules/:ruleId
+
+Deletes a notification rule.
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/notifications
+
+Returns paginated list of generated notifications for the project.
+
+**Parameters**
+
+| Parameter  | Type   | Description                                                        |
+| ---------- | ------ | ------------------------------------------------------------------ |
+| `source`   | string | (optional) Filter by notification source.                          |
+| `type`     | string | (optional) Filter by notification type.                            |
+| `severity` | string | (optional) Severity level (`critical`, `warning`, `info`).         |
+| `limit`    | number | (optional, default 50) Max records to retrieve (1-100).            |
+| `offset`   | number | (optional, default 0) Record offset.                               |
+
+**Sample response**
+
+```json
+{
+  "notifications": [
+    {
+      "id": "notif_01...",
+      "projectId": "3b290947-8a3d-4cbf-8468-b328a6fcf7bb",
+      "title": "Unusual traffic spike detected",
+      "message": "Visitor volume increased by 250% over baseline.",
+      "severity": "warning",
+      "createdAt": "2026-02-18T14:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/projects/:projectId/notifications/unread-count
+
+Returns count of unread notifications.
+
+**Sample response**
+
+```json
+{
+  "count": 3
+}
+```
+
+---
+
+## POST NEXT_PUBLIC_API_URL/projects/:projectId/notifications/mark-read
+
+Marks notifications as read.
+
+**Request body**
+
+```json
+{
+  "ids": ["notif_01..."]
+}
+```
+
+---
+
+## GET NEXT_PUBLIC_API_URL/webhooks/slack
+
+Handles Slack App OAuth redirect and installation callbacks to connect workspace channels with project alerts.
