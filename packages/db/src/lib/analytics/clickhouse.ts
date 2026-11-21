@@ -34,7 +34,8 @@ function getClient() {
 
   // Cloudflare Workers fetch() strictly requires http: or https:
   const safeProtocol = protocol.includes('http') ? protocol : (port === '8443' || port === '443' ? 'https:' : 'http:');
-  const finalUrl = `${safeProtocol}//${hostname}:${port}`;
+  const portStr = port ? `:${port}` : '';
+  const finalUrl = `${safeProtocol}//${hostname}${portStr}`;
 
   console.log('[ClickHouse Init] Attempting to connect to URL:', finalUrl);
 

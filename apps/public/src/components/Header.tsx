@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import logoWhite from '../assets/logo-white.png';
 import logoBlack from '../assets/logo-black.png';
 import { Sun, Moon, Menu, X } from 'lucide-react';
-import { DASHBOARD_URL } from '../lib/config';
+import { DOCS_URL, GITHUB_URL } from '../lib/config';
 
 export default function Header() {
   const [dark, setDark] = useState<boolean>(() => {
@@ -58,15 +58,34 @@ export default function Header() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
-          {['Features', 'Pricing', 'Docs', 'Blog'].map(item => (
-            <a
-              key={item}
-              href={`#${item.toLowerCase()}`}
-              className="text-sm font-medium text-t-secondary hover:text-t-primary transition-colors duration-200"
-            >
-              {item}
-            </a>
-          ))}
+          <a
+            href="#features"
+            className="text-sm font-medium text-t-secondary hover:text-t-primary transition-colors duration-200"
+          >
+            Features
+          </a>
+          <a
+            href="#pricing"
+            className="text-sm font-medium text-t-secondary hover:text-t-primary transition-colors duration-200"
+          >
+            Pricing
+          </a>
+          <a
+            href={DOCS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-t-secondary hover:text-t-primary transition-colors duration-200"
+          >
+            Docs
+          </a>
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-t-secondary hover:text-t-primary transition-colors duration-200"
+          >
+            GitHub
+          </a>
         </nav>
 
         {/* Actions */}
@@ -85,18 +104,15 @@ export default function Header() {
             )}
           </button>
 
-          <a
-            href={DASHBOARD_URL}
-            className="hidden sm:block text-sm font-medium text-t-secondary hover:text-t-primary transition-colors"
-          >
-            Sign in
-          </a>
-
           <motion.a
-            href={DASHBOARD_URL}
+            href="#features"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="px-4 sm:px-5 py-2 btn-brand-gradient text-xs sm:text-sm font-bold rounded-full transition-all"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="px-4 sm:px-5 py-2 btn-brand-gradient text-xs sm:text-sm font-bold rounded-full transition-all cursor-pointer"
           >
             Get started
           </motion.a>
@@ -115,22 +131,46 @@ export default function Header() {
       {/* Mobile nav */}
       {mobileOpen && (
         <div className="md:hidden bg-bg-card border-b border-bdr px-6 py-5 flex flex-col gap-4 shadow-xl">
-          {['Features', 'Pricing', 'Docs', 'Blog'].map(item => (
-            <a
-              key={item}
-              href={`#${item.toLowerCase()}`}
-              onClick={() => setMobileOpen(false)}
-              className="text-sm font-medium text-t-secondary hover:text-t-primary py-1"
-            >
-              {item}
-            </a>
-          ))}
+          <a
+            href="#features"
+            onClick={() => setMobileOpen(false)}
+            className="text-sm font-medium text-t-secondary hover:text-t-primary py-1"
+          >
+            Features
+          </a>
+          <a
+            href="#pricing"
+            onClick={() => setMobileOpen(false)}
+            className="text-sm font-medium text-t-secondary hover:text-t-primary py-1"
+          >
+            Pricing
+          </a>
+          <a
+            href={DOCS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setMobileOpen(false)}
+            className="text-sm font-medium text-t-secondary hover:text-t-primary py-1"
+          >
+            Docs
+          </a>
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setMobileOpen(false)}
+            className="text-sm font-medium text-t-secondary hover:text-t-primary py-1"
+          >
+            GitHub
+          </a>
           <div className="pt-2 border-t border-bdr flex flex-col gap-3">
-            <a href={DASHBOARD_URL} className="text-sm text-t-secondary py-1">
-              Sign in
-            </a>
             <a
-              href={DASHBOARD_URL}
+              href="#features"
+              onClick={(e) => {
+                e.preventDefault();
+                setMobileOpen(false);
+                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="text-sm font-bold text-sky-600 dark:text-sky-400"
             >
               Get started →

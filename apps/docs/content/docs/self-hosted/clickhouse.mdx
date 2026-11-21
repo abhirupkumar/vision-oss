@@ -1,0 +1,82 @@
+---
+title: ClickHouse Analytics Engine
+description: Set up, configure, and migrate Vision schemas to self-hosted or managed ClickHouse.
+---
+
+Vision uses **ClickHouse** as its primary columnar OLAP engine for storing and querying high-volume telemetry, web analytics events, session replay chunks, and LLM traces.
+
+If you do not want to use Tinybird, ClickHouse provides **100% feature parity** with complete data sovereignty and zero SaaS fees.
+
+---
+
+## 1. How ClickHouse Works in Vision
+
+When `TINYBIRD_TOKEN` is omitted from your environment, `@vision/db` activates the native ClickHouse driver (`@clickhouse/client-web`). It communicates over HTTP/HTTPS (ports `8123` / `8443`), making it fully compatible with both Node.js servers and edge runtimes (Cloudflare Workers).
+
+### Tables Created
+* `project_event`: Time-series pageviews, custom events, UTM tags, and Core Web Vitals (`LCP`, `INP`, `CLS`).
+* `event_data`: Unnested custom property key-value dictionaries.
+* `visitor_data`: Visitor traits, first-seen timestamps, and `$identify` attributes.
+* `project_revenue`: Purchases, transactions, and conversion values.
+* `session_replay`: Chunked DOM recording mutations.
+* `project_error`: Exception spans and stack traces.
+* `llm_events`: LLM prompt/completion spans, token usage, latency, and model cost attribution.
+
+---
+
+## 2. Automatic Initialization (Docker Compose)
+
+If you use the standard [Direct Ingestion Track](/self-hosted/direct-db), table creation is **completely automatic**:
+
+The `docker-compose.yml` mounts `docker/clickhouse-init.sql` into ClickHouse's entrypoint initialization directory:
+
+```yaml
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3-alpine
+    container_name: vision-clickhouse
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./docker/clickhouse-init.sql:/docker-entrypoint-initdb.d/init.sql
+```
+
+When the container starts for the first time, all tables, partitions, sorting keys, and materialized views are provisioned automatically before the backend starts listening.
+
+---
+
+## 3. Connecting to an External or Managed ClickHouse
+
+If you are using an external ClickHouse cluster (such as ClickHouse Cloud, Aiven, or a dedicated VPS), configure `CLICKHOUSE_URL`:
+
+```bash
+# Self-hosted / local ClickHouse (HTTP port 8123)
+CLICKHOUSE_URL=http://clickhouse:8123
+
+# ClickHouse with authentication
+CLICKHOUSE_URL=http://username:password@clickhouse-host:8123/default
+
+# Managed ClickHouse Cloud (HTTPS port 8443)
+CLICKHOUSE_URL=https://default:your_password@xyz.us-east-1.aws.clickhouse.cloud:8443/default
+```
+
+### Running the Schema Migration Script
+
+To push all schemas and materialized views to an external ClickHouse database:
+
+```bash
+pnpm db:clickhouse:push
+```
+
+This script:
+1. Connects to your configured `CLICKHOUSE_URL`.
+2. Inspects all schema definitions in `packages/db/tinybird/datasources`.
+3. Cleans annotations and executes `CREATE TABLE IF NOT EXISTS` for all tables.
+4. Generates and registers all materialized views for real-time aggregations.
+
+---
+
+## 4. Query & Storage Performance
+
+All ClickHouse tables in Vision are optimized for high-throughput append-only workloads:
+* **Partitioning**: Partitioned by month (`PARTITION BY toYYYYMM(created_at)`) for instant range drops and high compression.
+* **Sorting Keys**: Primary keys ordered by `(project_id, created_at, event_id)` for millisecond dashboard filter lookups.
+* **TTL Policies**: Configurable time-to-live policies (`TTL toDateTime(created_at) + toIntervalYear(2)`) to prevent unbounded disk growth.

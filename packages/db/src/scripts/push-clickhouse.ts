@@ -7,8 +7,10 @@ import dotenv from 'dotenv';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load .env from the root directory (d:\Project\vision-analytics\.env)
+// Load .env from root and working directory
+dotenv.config();
 dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 async function main() {
   const CLICKHOUSE_URL = process.env.CLICKHOUSE_URL;
@@ -19,7 +21,8 @@ async function main() {
 
   const { hostname, port, pathname, protocol, username = 'default', password } = new URL(CLICKHOUSE_URL);
   const safeProtocol = protocol.includes('http') ? protocol : (port === '8443' || port === '443' ? 'https:' : 'http:');
-  const finalUrl = `${safeProtocol}//${hostname}:${port}`;
+  const portStr = port ? `:${port}` : '';
+  const finalUrl = `${safeProtocol}//${hostname}${portStr}`;
   const database = pathname.replace('/', '') || 'default';
 
   console.log(`Connecting to ClickHouse at ${finalUrl} (database: ${database})`);

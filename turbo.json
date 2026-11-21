@@ -4,7 +4,13 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**", ".vinxi/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", ".vinxi/**", ".open-next/**"]
+    },
+    "@vision/backend#build": {
+      "outputs": []
+    },
+    "@vision/worker#build": {
+      "outputs": []
     },
     "dev": {
       "cache": false,

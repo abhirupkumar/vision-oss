@@ -3,8 +3,11 @@
   "pages": [
     "index",
     "direct-db",
+    "clickhouse",
     "kafka-streaming",
-    "comparison"
+    "tinybird",
+    "comparison",
+    "deployment"
   ],
   "defaultOpen": true
 }

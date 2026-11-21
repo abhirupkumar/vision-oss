@@ -2,8 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import logoWhite from '../assets/logo-white.png';
 import logoBlack from '../assets/logo-black.png';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
-import { DASHBOARD_URL } from '../lib/config';
+import { ArrowRight, CheckCircle2, Github, BookOpen } from 'lucide-react';
+import { DOCS_URL, GITHUB_URL } from '../lib/config';
 
 export default function FinalCTA() {
   return (
@@ -29,21 +29,27 @@ export default function FinalCTA() {
             </p>
             <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-3.5">
               <motion.a
-                href={DASHBOARD_URL}
+                href={DOCS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 className="px-7 sm:px-8 py-3.5 sm:py-4 btn-brand-gradient font-bold rounded-full text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-lg"
               >
-                Start free
+                <BookOpen className="w-4 h-4" />
+                Get Started with Docs
                 <ArrowRight className="w-4 h-4" />
               </motion.a>
               <motion.a
-                href={DASHBOARD_URL}
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="px-7 sm:px-8 py-3.5 sm:py-4 bg-slate-100 dark:bg-white/[0.06] border border-slate-200/60 dark:border-white/10 text-t-primary font-semibold rounded-full text-xs sm:text-sm hover:bg-slate-200 dark:hover:bg-white/[0.1] transition-all text-center"
+                className="px-7 sm:px-8 py-3.5 sm:py-4 bg-slate-100 dark:bg-white/[0.06] border border-slate-200/60 dark:border-white/10 text-t-primary font-semibold rounded-full text-xs sm:text-sm hover:bg-slate-200 dark:hover:bg-white/[0.1] transition-all flex items-center justify-center gap-2 text-center"
               >
-                See live demo
+                <Github className="w-4 h-4" />
+                View on GitHub
               </motion.a>
             </div>
             <p className="text-xs text-t-muted mt-5 sm:mt-6 flex items-center justify-center md:justify-start gap-2">

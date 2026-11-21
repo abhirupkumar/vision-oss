@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Sparkles, BookOpen, Github } from 'lucide-react';
 import HeroShowcase from './HeroShowcase';
-import { DASHBOARD_URL } from '../lib/config';
+import { DOCS_URL, GITHUB_URL } from '../lib/config';
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() =>
@@ -21,11 +21,9 @@ function useIsMobile() {
 
 export default function Hero() {
   const isMobile = useIsMobile();
-  const [email, setEmail] = useState('');
 
-  const handleStartFree = (e: React.FormEvent) => {
-    e.preventDefault();
-    window.location.href = DASHBOARD_URL;
+  const handleScrollToFeatures = () => {
+    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -71,34 +69,36 @@ export default function Hero() {
               From first prompt to profitable customer.
             </p>
 
-            {/* Email form + CTA button */}
-            <form
-              onSubmit={handleStartFree}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 max-w-[480px] mb-3.5"
-            >
-              <div className="relative flex-1">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your work e-mail"
-                  className="w-full px-4 sm:px-4.5 py-3 sm:py-3.5 rounded-xl bg-slate-100/90 dark:bg-[#11131A]/90 border border-slate-300/80 dark:border-white/10 text-t-primary text-xs sm:text-sm placeholder:text-t-muted focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:focus:ring-sky-400/30 transition-all shadow-inner"
-                />
-              </div>
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-[480px] mb-4">
               <motion.button
-                type="submit"
+                type="button"
+                onClick={handleScrollToFeatures}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="px-6 sm:px-7 py-3 sm:py-3.5 btn-brand-gradient font-bold rounded-xl text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-lg shrink-0"
+                className="px-6 sm:px-7 py-3 sm:py-3.5 btn-brand-gradient font-bold rounded-xl text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer"
               >
-                Start for free
+                Explore Features
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
-            </form>
 
-            {/* Switch note */}
-            <p className="text-[12px] sm:text-[13px] text-t-muted leading-relaxed max-w-[480px] mb-6 sm:mb-8">
-              Datadog or Mixpanel bill too high? Migrate today, the rest of your contract is on us.{' '}
+              <motion.a
+                href={DOCS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-6 sm:px-7 py-3 sm:py-3.5 bg-slate-200/80 dark:bg-white/[0.07] border border-slate-300/80 dark:border-white/10 text-t-primary font-semibold rounded-xl text-xs sm:text-sm hover:bg-slate-300 dark:hover:bg-white/[0.12] transition-all flex items-center justify-center gap-2 text-center"
+              >
+                <BookOpen className="w-4 h-4 text-sky-500" />
+                Documentation
+              </motion.a>
+            </div>
+
+            {/* Open Source Note */}
+            <p className="text-[12px] sm:text-[13px] text-t-muted leading-relaxed max-w-[480px] mb-6 sm:mb-8 flex items-center gap-2">
+              <Github className="w-4 h-4 text-t-secondary" />
+              <span>Free & self-hostable. GNU AGPLv3 community core.</span>
             </p>
 
             {/* Trust badges */}

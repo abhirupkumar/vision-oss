@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DASHBOARD_URL } from '../lib/config';
+import { DASHBOARD_URL, SHOW_PAID_PLANS, DOCS_URL, GITHUB_URL } from '../lib/config';
 import {
   Check,
   Zap,
@@ -14,6 +14,11 @@ import {
   Split,
   Terminal,
   HelpCircle,
+  BookOpen,
+  Github,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 // Pricing Rate Card Math Helpers
@@ -105,6 +110,7 @@ export default function Pricing() {
   const [replays, setReplays] = useState(1000); // 1k replays
   const [errorsK, setErrorsK] = useState(20); // 20k errors
   const [llmK, setLlmK] = useState(10); // 10k LLM calls
+  const [showCalculator, setShowCalculator] = useState(false);
 
   // Math
   const eventsCost = calculateEventsCost(eventsK * 1000);
@@ -134,22 +140,207 @@ export default function Pricing() {
           transition={{ duration: 0.45 }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/20 text-xs font-semibold mb-4">
-            <Zap size={14} /> Universal $39 Base Plan with Included Usage Credit
-          </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-t-primary leading-tight">
-            One Base Plan. Unlimited Products.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-cyan-400">
-              Draw down your $39 credit universally.
-            </span>
-          </h2>
-          <p className="text-base sm:text-lg text-t-secondary mt-4 leading-relaxed">
-            Every dollar of your $39 base plan turns directly into universal usage credit across Web Analytics, Session Replays, Error Tracking, LLM Observability, and A/B Testing. MCP Server is 100% free.
-          </p>
+          {SHOW_PAID_PLANS ? (
+            <>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/20 text-xs font-semibold mb-4">
+                <Zap size={14} /> Universal $39 Base Plan with Included Usage Credit
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-t-primary leading-tight">
+                One Base Plan. Unlimited Products.<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-cyan-400">
+                  Draw down your $39 credit universally.
+                </span>
+              </h2>
+              <p className="text-base sm:text-lg text-t-secondary mt-4 leading-relaxed">
+                Every dollar of your $39 base plan turns directly into universal usage credit across Web Analytics, Session Replays, Error Tracking, LLM Observability, and A/B Testing. MCP Server is 100% free.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Open-Source Community Edition & Cloud Roadmap
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-t-primary leading-tight">
+                100% Open-Source First.<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-cyan-400">
+                  Community Edition is free forever.
+                </span>
+              </h2>
+              <p className="text-base sm:text-lg text-t-secondary mt-4 leading-relaxed">
+                Run Vision on your own infrastructure with Docker Compose. Complete data ownership, no telemetry limits, and zero vendor lock-in. Vision Cloud (Managed) is launching soon.
+              </p>
+            </>
+          )}
         </motion.div>
 
-        {/* Pricing Architecture Bento */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-16">
+        {!SHOW_PAID_PLANS ? (
+          /* OSS First: Two-Column Plan Comparison (Community Edition Active + Cloud Coming Soon) */
+          <div className="space-y-12 mb-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+              {/* Community Edition Card (Active) */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45 }}
+                className="lg:col-span-6 relative rounded-3xl p-8 bg-bg-card border-2 border-emerald-500/80 shadow-2xl shadow-emerald-500/10 flex flex-col justify-between"
+              >
+                <div className="absolute -top-3.5 right-6 px-3.5 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Available Now
+                </div>
+
+                <div>
+                  <div className="text-xs uppercase tracking-wider font-bold text-emerald-600 dark:text-emerald-400 mb-1">
+                    Vision Community Edition
+                  </div>
+                  <div className="flex items-baseline gap-1 mb-2">
+                    <span className="text-5xl font-black tracking-tight text-t-primary">$0</span>
+                    <span className="text-base text-t-secondary font-medium">/ free forever (self-hosted)</span>
+                  </div>
+                  <p className="text-sm text-t-secondary mb-6 leading-relaxed">
+                    Deploy on your own infrastructure with Docker Compose. Complete data ownership, no telemetry caps, and no monthly fees.
+                  </p>
+
+                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 mb-6 space-y-1.5">
+                    <div className="font-bold flex items-center gap-1.5 text-sm">
+                      <ShieldCheck size={16} /> 100% Unmetered & Private
+                    </div>
+                    <div>Run PostgreSQL + ClickHouse on your own VPS or cluster. Direct database ingestion and Kafka buffering included.</div>
+                  </div>
+
+                  <div className="space-y-3 mb-8">
+                    {[
+                      'Unlimited Web Analytics, Pageviews & Custom Events',
+                      'Session Replays with RRWeb streaming',
+                      'Performance Monitoring & Web Vitals (LCP, INP, CLS)',
+                      'ClickHouse & Tinybird storage architecture',
+                      'High-Throughput Streaming via Kafka & Ingestion Worker',
+                      'Funnels, Retention Cohorts, User Journeys & Distinct IDs',
+                      'Full REST API & Developer SDKs (Browser JS & Python)',
+                      '1-Command Docker Compose local cluster startup',
+                    ].map((feat) => (
+                      <div key={feat} className="flex items-start gap-2.5 text-xs text-t-primary">
+                        <div className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                          <Check size={11} strokeWidth={3} />
+                        </div>
+                        <span>{feat}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2.5 pt-4">
+                  <a
+                    href={DOCS_URL + '/self-hosted'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3.5 px-6 rounded-2xl font-bold text-sm text-center transition-all bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <BookOpen size={16} />
+                    Deploy Community Edition
+                  </a>
+                  <a
+                    href={GITHUB_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 px-6 rounded-2xl font-semibold text-xs text-center transition-all bg-bg-card border border-bdr text-t-secondary hover:text-t-primary flex items-center justify-center gap-2"
+                  >
+                    <Github size={15} />
+                    Star on GitHub
+                  </a>
+                </div>
+              </motion.div>
+
+              {/* Vision Cloud Card (Coming Soon) */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: 0.1 }}
+                className="lg:col-span-6 relative rounded-3xl p-8 bg-bg-card border border-sky-500/30 shadow-xl flex flex-col justify-between"
+              >
+                <div className="absolute -top-3.5 right-6 px-3.5 py-1 rounded-full bg-gradient-to-r from-sky-600 to-indigo-600 text-white text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5">
+                  <Sparkles size={12} /> Coming Soon
+                </div>
+
+                <div>
+                  <div className="text-xs uppercase tracking-wider font-bold text-sky-600 dark:text-sky-400 mb-1">
+                    Vision Cloud (Managed)
+                  </div>
+                  <div className="flex items-baseline gap-1 mb-2">
+                    <span className="text-5xl font-black tracking-tight text-t-primary">$39</span>
+                    <span className="text-base text-t-secondary font-medium">/ month (at launch)</span>
+                  </div>
+                  <p className="text-sm text-t-secondary mb-6 leading-relaxed">
+                    Zero DevOps managed observability with live Customer Gross Margin, automated runaway bill-shock alerts, and universal credits.
+                  </p>
+
+                  <div className="p-4 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-xs text-sky-800 dark:text-sky-300 mb-6 space-y-1.5">
+                    <div className="font-bold flex items-center gap-1.5 text-sm">
+                      <Zap size={16} /> $39 Universal Usage Credit Included
+                    </div>
+                    <div>Every dollar of your $39 base fee converts directly into universal usage credit. No add-on fees or separate product tax.</div>
+                  </div>
+
+                  <div className="space-y-3 mb-8">
+                    {[
+                      'Live Customer Gross Margin Engine (Stripe/Paddle + LLM proxy)',
+                      'Automated Runaway Bill-Shock Alerts on Slack & Discord',
+                      'Statistical Anomaly Detection (Z-Score, EWMA, WoW baselines)',
+                      'Cursor & Claude MCP Server Integration for AI coding IDEs',
+                      'Global Multi-Region Edge Ingestion (<10ms global latency)',
+                      'Automatic Schema Migrations, Tinybird Managed DB & zero maintenance',
+                      'Configurable Monthly Spending Caps & Overuse Circuit Breakers',
+                      'Enterprise SAML / SSO & Priority SLA Support',
+                    ].map((feat) => (
+                      <div key={feat} className="flex items-start gap-2.5 text-xs text-t-primary">
+                        <div className="w-4 h-4 rounded-full bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 mt-0.5">
+                          <Check size={11} strokeWidth={3} />
+                        </div>
+                        <span>{feat}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2.5 pt-4">
+                  <div className="w-full py-3.5 px-6 rounded-2xl font-bold text-sm text-center bg-slate-200/60 dark:bg-zinc-800/60 text-t-muted border border-border flex items-center justify-center gap-2 cursor-not-allowed">
+                    <Sparkles size={16} className="text-sky-500" />
+                    Cloud Edition — Launching Soon
+                  </div>
+                  <a
+                    href={GITHUB_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 px-6 rounded-2xl font-semibold text-xs text-center transition-all bg-bg-card border border-bdr text-t-secondary hover:text-t-primary flex items-center justify-center gap-2"
+                  >
+                    <Github size={15} />
+                    Star Repository for Cloud Launch Alerts
+                  </a>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Toggle Calculator Preview */}
+            <div className="flex justify-center pt-4">
+              <button
+                type="button"
+                onClick={() => setShowCalculator(!showCalculator)}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-bg-card border border-bdr text-xs sm:text-sm font-semibold text-t-primary hover:border-sky-500/50 transition-all cursor-pointer shadow-sm"
+              >
+                <Sliders size={16} className="text-sky-500" />
+                {showCalculator ? 'Hide Cloud Rate Card & Calculator' : 'Preview Cloud Usage Rate Card & Calculator'}
+                {showCalculator ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Pricing Architecture Bento (Shown when SHOW_PAID_PLANS is true OR when toggled via preview) */}
+        {(SHOW_PAID_PLANS || showCalculator) && (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-16">
           {/* Left: Base Plan Card (5 cols) */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -205,10 +396,10 @@ export default function Pricing() {
             </div>
 
             <a
-              href={DASHBOARD_URL}
-              className="w-full py-3.5 px-6 rounded-2xl font-bold text-sm text-center transition-all btn-brand-gradient shadow-lg block block"
+              href={SHOW_PAID_PLANS ? DASHBOARD_URL : GITHUB_URL}
+              className="w-full py-3.5 px-6 rounded-2xl font-bold text-sm text-center transition-all btn-brand-gradient shadow-lg block"
             >
-              Start 7-Day Free Trial
+              {SHOW_PAID_PLANS ? 'Start 7-Day Free Trial' : 'Star on GitHub'}
             </a>
           </motion.div>
 
@@ -451,6 +642,8 @@ export default function Pricing() {
             </div>
           </div>
         </div>
+        </>
+        )}
 
         {/* FAQ */}
         <div className="max-w-3xl mx-auto">

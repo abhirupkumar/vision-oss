@@ -27,3 +27,13 @@ export function getDashboardUrl(path = ''): string {
 }
 
 export const DASHBOARD_URL = getDashboardUrl();
+
+export const DOCS_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env as any).VITE_DOCS_URL) ||
+  'https://docs.visionhq.tech';
+
+export const GITHUB_URL = 'https://github.com/abhirupkumar/vision-oss';
+
+export const SHOW_PAID_PLANS =
+  (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env as any).VITE_SHOW_PAID_PLANS === 'true') ||
+  false;

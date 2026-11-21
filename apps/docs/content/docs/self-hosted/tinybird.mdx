@@ -1,0 +1,108 @@
+---
+title: Tinybird Analytics Cloud
+description: Deploy and push Vision's analytics schemas, materialized views, and routing pipes to any Tinybird workspace.
+---
+
+Vision supports **Tinybird** as a fully managed, serverless ClickHouse layer. While standard self-hosted deployments run a local ClickHouse container, Tinybird offers zero-maintenance scaling, real-time materialized views, and native Kafka connectors.
+
+---
+
+## 1. Prerequisites
+
+1. A **Tinybird Account**: Sign up at [tinybird.co](https://www.tinybird.co).
+2. A **Workspace Token**: In your Tinybird dashboard, go to **Tokens** and copy an admin token with read/write permissions.
+3. **Tinybird CLI (`tb`)**: Installed via Python or binary:
+   ```bash
+   pip install tinybird-cli
+   ```
+   *(Or on macOS/Linux via curl: `curl -s https://tinybird.co | sh`)*
+
+---
+
+## 2. Authenticating to Your Tinybird Workspace
+
+Vision's schema definitions live in `packages/db/tinybird`. You can push them to **any Tinybird region** (US, EU, or AP):
+
+```bash
+cd packages/db/tinybird
+```
+
+Run `tb auth` targeting your region's host URL:
+
+```bash
+# For US East (AWS)
+tb auth --token <YOUR_TINYBIRD_ADMIN_TOKEN> --host https://api.us-east.tinybird.co
+
+# For EU Central (GCP)
+tb auth --token <YOUR_TINYBIRD_ADMIN_TOKEN> --host https://api.tinybird.co
+
+# For AP East (AWS)
+tb auth --token <YOUR_TINYBIRD_ADMIN_TOKEN> --host https://api.ap-east-1.aws.tinybird.co
+```
+
+The CLI will verify your token and save your workspace credentials in a local `.tinyb` file (which is gitignored).
+
+---
+
+## 3. Configuring Kafka Secrets (Optional)
+
+If you use Tinybird's native Kafka connector (`connections/aiven_kafka.connection`), configure your Kafka cluster credentials as Tinybird workspace secrets:
+
+```bash
+tb secret set KAFKA_SERVERS="kafka.example.com:9092"
+tb secret set KAFKA_USERNAME="your-kafka-username"
+tb secret set KAFKA_PASSWORD="your-kafka-password"
+```
+
+If you are using direct ingestion or Vision's standalone `apps/ingestion-worker`, you can skip this step.
+
+---
+
+## 4. Pushing Datasources and Materialized Pipes
+
+Push all schema definitions and transformation pipes to your Tinybird workspace:
+
+```bash
+tb push --force
+```
+
+This registers the following core entities in your workspace:
+
+### Physical Datasources
+* `project_event`: High-frequency pageviews, custom events, and Web Vitals.
+* `event_data`: Unnested custom property key-value pairs.
+* `visitor_data`: Visitor traits, user profiles, and `$identify` attributes.
+* `project_revenue`: Purchases, transactions, and Stripe/Paddle conversions.
+* `session_replay`: DOM mutation recording chunks.
+* `project_error`: Exception spans and stack traces.
+
+### Materialized Aggregation Pipes
+* `project_event_stats_hourly_pipeline`: Pre-aggregates pageviews and visitors by hour.
+* `project_session_stats_pipeline`: Pre-aggregates bounce rates and session durations.
+* `project_visitor_stats_pipeline`: Real-time active visitor counts.
+* `route_*`: High-throughput routing pipes that demultiplex multiplexed Kafka streams.
+
+Verify the pushed datasources:
+
+```bash
+tb datasource ls
+```
+
+---
+
+## 5. Configuring Vision to Use Tinybird
+
+Once pushed, connect your Vision Backend and Dashboard to Tinybird by setting two environment variables in your `.env`:
+
+```bash
+# Tinybird API endpoint matching your workspace region
+TINYBIRD_URL=https://api.us-east.tinybird.co
+
+# Tinybird Read/Write Token
+TINYBIRD_TOKEN=p.eyJ...
+```
+
+When `TINYBIRD_TOKEN` is present, the Vision data platform automatically:
+1. Directs event ingestion batches to Tinybird's high-speed HTTP ingestion endpoints.
+2. Runs dashboard queries against Tinybird's materialized pipes.
+3. Disables local ClickHouse container requirements.

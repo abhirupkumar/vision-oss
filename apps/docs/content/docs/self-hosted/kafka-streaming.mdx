@@ -1,84 +1,110 @@
 ---
 title: Track 2 - High-Throughput Streaming
-description: Scale Vision Community Edition to 10M+ events per month using Kafka buffering.
+description: Scale Vision Community Edition to 10M+ events per month using Kafka buffering and the Ingestion Worker.
 ---
 
-When scaling beyond 10M+ events per month, direct database writes can cause connection contention during traffic spikes. The **High-Throughput Streaming Track** inserts a Kafka message bus between the edge ingestion API and ClickHouse.
+When scaling beyond 10M+ events per month, direct database writes can cause connection contention during sudden traffic surges. The **High-Throughput Streaming Track** inserts a Kafka message bus between the edge ingestion API and ClickHouse or Tinybird.
+
+---
 
 ## Architecture Overview
 
 ```text
-Client SDKs / Apps
-       │  HTTP POST /send
+Client Trackers / Mobile SDKs
+       │  HTTP POST /api/send
        ▼
 apps/backend (Hono Ingestion API)
-       │  HTTP POST (Kafka REST Proxy)
+       │  HTTP POST (Stateless Kafka REST Proxy)
        ▼
-Aiven / Self-Hosted Kafka Cluster
+Kafka Cluster (Aiven, Confluent, or Self-Hosted)
        ├── Topic: events      (project_event, llm_events)
        ├── Topic: properties  (event_data, visitor_data)
-       ├── Topic: telemetry   (project_error, ab_tests)
+       ├── Topic: telemetry   (project_error, ab_test_session)
        ├── Topic: business    (project_revenue)
        └── Topic: replays     (session_replay)
        │
        ▼
 apps/ingestion-worker (Consumer Group: vision-ingestion-group)
-       │  Micro-Batch Flush (up to 10,000 rows / 5s)
+       │  Micro-Batch Flush (up to 10MB or 5-second interval)
        ▼
-ClickHouse Analytics Database
+Analytics Database (ClickHouse HTTP or Tinybird)
 ```
 
 ---
 
-## 1. Kafka Setup (Aiven or Self-Hosted)
+## 1. Kafka Cluster Setup
 
-### Required Topics
-Create the following 5 physical Kafka topics with appropriate partition counts (minimum 3 partitions recommended):
+Create the following 5 physical Kafka topics. A minimum of **3 partitions** per topic is recommended:
 
-| Topic Name | Purpose | Multiplexed Stream Types |
-| :--- | :--- | :--- |
-| `events` | High-frequency telemetry | `project_event`, `llm_events` |
-| `properties` | Custom trait dictionaries | `event_data`, `visitor_data` |
-| `telemetry` | Exceptions & experiments | `project_error`, `ab_test_session` |
-| `business` | Revenue & conversions | `project_revenue` |
-| `replays` | Chunked mutation streams | `session_replay` |
+| Topic Name | Purpose | Multiplexed Stream Types | Recommended Retention |
+| :--- | :--- | :--- | :--- |
+| `events` | High-frequency telemetry | `project_event`, `llm_events` | 3 days |
+| `properties` | Custom trait dictionaries | `event_data`, `visitor_data` | 3 days |
+| `telemetry` | Exceptions & experiments | `project_error`, `ab_test_session` | 7 days |
+| `business` | Revenue & conversions | `project_revenue` | 14 days |
+| `replays` | Chunked DOM mutation streams | `session_replay` | 2 days |
 
 ---
 
 ## 2. Environment Configuration
 
-In your backend and worker `.env`:
+Add the Kafka flags to your backend `.env` file:
 
 ```bash
-# Enable Kafka REST proxy mode
+# Enable Kafka buffering in @vision/db
 KAFKA_PRESENT=true
-KAFKA_REST_URL=https://user:password@kafka-rest-proxy.example.com:443
+
+# Kafka REST Proxy connection string (supports embedded Basic Auth)
+KAFKA_REST_URL=https://user:password@kafka-rest-proxy.example.aivencloud.com:443
 KAFKA_USERNAME=your_username
 KAFKA_PASSWORD=your_password
 
-# ClickHouse connection
+# Target analytics database (ClickHouse or Tinybird)
 CLICKHOUSE_URL=http://clickhouse:8123
+# Or if using Tinybird:
+# TINYBIRD_URL=https://api.us-east.tinybird.co
+# TINYBIRD_TOKEN=p.eyJ...
 ```
+
+When `KAFKA_PRESENT=true` is set, the backend stops executing direct database inserts and instead immediately publishes events to the Kafka REST Proxy. This ensures `sub-10ms` response times even during massive viral traffic spikes.
 
 ---
 
-## 3. Launching the Ingestion Worker
+## 3. How the Ingestion Worker Operates
 
-Build and start the ingestion consumer:
+`apps/ingestion-worker` is a specialized TypeScript daemon located in the monorepo:
+1. **Dynamic Consumer Registration**: Registers as `vision-consumer-1` under group `vision-ingestion-group`.
+2. **Auto-Recovery**: Recovers automatically if a Kafka broker rebalances or evicts a connection (`404` or session timeout).
+3. **Micro-Batching**: Pulls batches up to 10MB every 5,000ms (`FLUSH_INTERVAL_MS`).
+4. **Grouped Flush**: Separates records by destination table and writes them in parallel blocks using ClickHouse HTTP or Tinybird batch inserts.
+5. **Safe Offset Commit**: Commits message offsets to Kafka **only after** the analytics database confirms the insert.
+6. **Health Probe**: Listens on `PORT=8080` (endpoint `GET /health`) for container health checks and keep-alive pings.
+
+---
+
+## 4. Deploying the Ingestion Worker
+
+### Option A: Standalone Node / TSX Process
+From the repository root:
 
 ```bash
-pnpm --filter @vision/ingestion-worker build
-node apps/ingestion-worker/dist/index.js
+pnpm --filter @vision/ingestion-worker start
 ```
 
-Or run via Docker:
+### Option B: Docker Container
+Build the container using the monorepo Dockerfile:
+
+```bash
+docker build -t vision-ingestion-worker -f apps/ingestion-worker/Dockerfile .
+```
+
+Run the container:
 
 ```bash
 docker run -d \
   --name vision-ingestion-worker \
   --restart unless-stopped \
   --env-file .env \
+  -p 8080:8080 \
   vision-ingestion-worker:latest
 ```
-
-The consumer group `vision-ingestion-group` will subscribe to all 5 topics and flush batched inserts to ClickHouse every 5 seconds.

@@ -7,6 +7,7 @@
     "dev": "tsx watch --env-file=../../.env src/index.ts ",
     "build": "echo \"Skipping strict tsc for legacy backend port\"",
     "start": "node --env-file=../../.env dist/index.js",
+    "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
     "routes:generate": "node scripts/generate-routes.cjs"
   },

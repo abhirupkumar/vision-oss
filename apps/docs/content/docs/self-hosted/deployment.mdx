@@ -1,0 +1,119 @@
+---
+title: Service Deployment Matrix
+description: How to deploy and run each individual application and worker across Docker, VPS, and Cloudflare.
+---
+
+Vision is organized as a Turborepo monorepo with multiple specialized applications. Depending on whether you run completely self-hosted or leverage edge services, each application can be deployed independently.
+
+---
+
+## Deployment Matrix Overview
+
+| Service | Monorepo Path | Type | Self-Hosted Target | Edge / Cloud Target |
+| :--- | :--- | :--- | :--- | :--- |
+| **Backend API** | `apps/backend` | Hono REST API | Docker / Node.js (:3001) | Cloudflare Worker (`api-vision`) |
+| **Dashboard** | `apps/dashboard` | Next.js 15 UI | Docker / Node.js (:3000) | Cloudflare Pages / OpenNext (`vision`) |
+| **Ingestion Worker** | `apps/ingestion-worker` | Node.js Daemon | Docker / VPS (:8080) | Persistent Container (Fly/Railway) |
+| **Crons & Alerts** | `apps/worker` | Scheduled Job | Node cron runner | Cloudflare Scheduled Worker (`worker-vision`) |
+| **Public Landing** | `apps/public` | Vite React SPA | Nginx / Caddy static | Cloudflare Pages / Vercel |
+| **Docs Site** | `apps/docs` | Next.js Fumadocs | Node.js container | Cloudflare Pages / Vercel |
+
+---
+
+## 1. Backend Ingestion API (`apps/backend`)
+
+The backend receives events from client trackers, verifies project keys, checks bots, and writes to ClickHouse or Kafka.
+
+### Self-Hosted (Docker)
+Build and run via Docker:
+```bash
+docker build -t vision-backend -f apps/backend/Dockerfile .
+docker run -d --name vision-backend -p 3001:3001 --env-file .env vision-backend
+```
+
+### Cloudflare Worker
+Deploy as an edge worker:
+```bash
+pnpm run deploy:backend
+# Or directly from apps/backend:
+cd apps/backend && npx wrangler deploy
+```
+
+---
+
+## 2. Dashboard Application (`apps/dashboard`)
+
+The full-stack Next.js 15 analytics dashboard with product analytics, user journeys, session replays, and funnels.
+
+### Self-Hosted (Docker)
+Included in the root `docker-compose.yml`. Builds using standalone Next.js output on port 3000.
+
+### Cloudflare Pages (OpenNext)
+Build and deploy using OpenNext Cloudflare adapter:
+```bash
+pnpm --filter @vision/dashboard run build:worker
+pnpm run deploy:dashboard
+# Or from apps/dashboard:
+cd apps/dashboard && npx wrangler deploy
+```
+
+---
+
+## 3. Ingestion Worker (`apps/ingestion-worker`)
+
+A persistent daemon that drains Kafka topics in micro-batches and commits offsets to ClickHouse or Tinybird.
+
+> [!IMPORTANT]
+> Because the Ingestion Worker relies on an active consumer loop (`setInterval`), it requires a persistent process or container (e.g. Docker, VPS, Fly.io, Railway) and cannot be run as a serverless Cloudflare Worker.
+
+### Run with Docker:
+```bash
+docker build -t vision-ingestion-worker -f apps/ingestion-worker/Dockerfile .
+docker run -d --name vision-ingestion-worker --restart unless-stopped --env-file .env vision-ingestion-worker
+```
+
+### Run with Node / TSX:
+```bash
+pnpm --filter @vision/ingestion-worker start
+```
+
+---
+
+## 4. Background Crons Worker (`apps/worker`)
+
+Runs scheduled tasks every 5 minutes (runaway bill-shock checks, subscription lockouts, and anomaly notifications).
+
+### Cloudflare Scheduled Worker:
+```bash
+pnpm run deploy:worker
+# Or from apps/worker:
+cd apps/worker && npx wrangler deploy
+```
+
+---
+
+## 5. Public Landing Page (`apps/public`)
+
+Static marketing landing page built with Vite + React.
+
+### Build and Deploy:
+```bash
+pnpm --filter @vision/public run build
+```
+Upload the compiled `apps/public/dist` directory to Cloudflare Pages, Vercel, or serve behind Nginx.
+Alternatively, deploy with Wrangler:
+```bash
+pnpm run deploy:public
+```
+
+---
+
+## 6. Documentation Site (`apps/docs`)
+
+Static Next.js docs powered by Fumadocs.
+
+### Build and Deploy:
+```bash
+pnpm --filter @vision/docs run build
+```
+Deploy the output to Cloudflare Pages or Vercel with root directory set to `apps/docs`.

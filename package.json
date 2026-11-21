@@ -13,9 +13,14 @@
     "typecheck": "turbo typecheck",
     "db:generate": "pnpm -F @vision/db db:generate",
     "db:push": "pnpm -F @vision/db db:push",
+    "db:clickhouse:push": "pnpm -F @vision/db db:clickhouse:push",
     "db:studio": "pnpm -F @vision/db db:studio",
     "tinybird:clear": "pnpm -F @vision/db tinybird:clear",
-    "db:clear": "pnpm -F @vision/db db:clear"
+    "db:clear": "pnpm -F @vision/db db:clear",
+    "deploy:dashboard": "pnpm --filter @vision/dashboard run deploy",
+    "deploy:backend": "pnpm --filter @vision/backend run deploy",
+    "deploy:worker": "pnpm --filter @vision/worker run deploy",
+    "deploy:public": "pnpm --filter @vision/public run deploy"
   },
   "packageManager": "pnpm@10.33.0",
   "devDependencies": {
