@@ -17,7 +17,6 @@ Vision Cloud provides automated multi-tenant scaling, edge latency optimization,
 | **LLM Proxy Tracing** | Included (Local token logging) | Included (Sub-millisecond streaming) | Tracing for OpenAI, Anthropic, Gemini, Groq. |
 | **Live Customer Gross Margin Engine** | Excluded | **Included** (Stripe/Paddle + LLM Token Join) | Detects unprofitable customers where token costs exceed subscription revenue. |
 | **AI Bill-Shock & Anomaly Alerts**| Excluded | **Included** (Slack, Discord, Email) | Alerts you when AI agent loops spike costs before bills explode. |
-| **MCP Server for Cursor & Claude** | Excluded | **Included** (Full 6-tool `@vision/mcp`) | Autonomous coding agents query live metrics directly in your IDE. |
 | **In-App Autonomous AI Chatbot** | Excluded | **Included** (BYOK: Gemini, OpenAI, Claude) | Natural language root-cause analysis across dropoffs and errors. |
 | **Managed Billing & Lockouts** | Excluded (No lockouts) | **Turnkey Managed Billing** (Dodo Payments) | Automated merchant-of-record integration and spending caps. |
 
@@ -30,4 +29,3 @@ We encourage teams to start on **Community Edition** during early prototyping. M
 1. **Traffic exceeds 500,000 monthly events**: Disk space and ClickHouse maintenance begin costing more in engineering time than the $39/month Cloud plan.
 2. **You ship customer-facing AI agents**: You need the **Customer Gross Margin Engine** to ensure high-usage users aren't bankrupting your product.
 3. **You need cost insurance**: You cannot afford to wake up to a $4,000 runaway OpenAI bill because an autonomous agent entered an unhandled recursive loop.
-4. **Your engineering team uses Cursor or Claude Desktop**: You want AI agents to query live production traces and error rates via `@vision/mcp`.
